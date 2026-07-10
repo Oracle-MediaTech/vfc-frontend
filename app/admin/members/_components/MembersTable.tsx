@@ -5,7 +5,18 @@ import { AccountStatus, IUser } from "@/types/user";
 import { DataTable } from "@/components/ui/datatable";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Mail, MoreHorizontal, Pencil, Key, Trash2, UserCog, Ban, Archive, RotateCcw, CircleSlash } from "lucide-react";
+import {
+  Mail,
+  MoreHorizontal,
+  Pencil,
+  Key,
+  Trash2,
+  UserCog,
+  Ban,
+  Archive,
+  RotateCcw,
+  CircleSlash,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,10 +38,10 @@ interface MembersTableProps {
 }
 
 const ACCOUNT_STATUS_BADGE: Record<AccountStatus, string> = {
-  ACTIVE:    "bg-green-100 text-green-800 border-green-200",
-  INACTIVE:  "bg-gray-100 text-gray-800 border-gray-200",
+  ACTIVE: "bg-green-100 text-green-800 border-green-200",
+  INACTIVE: "bg-gray-100 text-gray-800 border-gray-200",
   SUSPENDED: "bg-amber-100 text-amber-800 border-amber-200",
-  ARCHIVED:  "bg-red-100 text-red-800 border-red-200",
+  ARCHIVED: "bg-red-100 text-red-800 border-red-200",
 };
 
 const roleBadgeColor: Record<string, string> = {
@@ -40,9 +51,8 @@ const roleBadgeColor: Record<string, string> = {
 };
 
 const statusBadgeColor: Record<string, string> = {
-  FIRST_TIMER: "bg-yellow-100 text-yellow-800",
-  VISITOR: "bg-purple-100 text-purple-800",
-  MEMBER: "bg-green-100 text-green-800",
+  NON_WORKER: "bg-yellow-100 text-yellow-800",
+  WORKER: "bg-green-100 text-green-800",
 };
 
 export default function MembersTable({
@@ -72,14 +82,17 @@ export default function MembersTable({
       accessorKey: "phoneNumber",
     },
     {
-      header: "Church Status",
-      accessorKey: "churchStatus",
+      header: "Membership Type",
+      accessorKey: "membershipType",
       cell: ({ row }) => (
         <Badge
           variant="outline"
-          className={statusBadgeColor[row.original.churchStatus] || ""}
+          className={
+            statusBadgeColor[row?.original?.membershipType || "NON_WORKER"] ||
+            ""
+          }
         >
-          {row.original.churchStatus?.replace("_", " ")}
+          {row.original.membershipType?.replace("_", " ")}
         </Badge>
       ),
     },
@@ -141,7 +154,12 @@ export default function MembersTable({
                 <Mail className="h-4 w-4 mr-2" /> Send Invite Email
               </DropdownMenuItem>
             )}
-            {onUpdateStatus && <AccountStatusItems user={row.original} onUpdateStatus={onUpdateStatus} />}
+            {onUpdateStatus && (
+              <AccountStatusItems
+                user={row.original}
+                onUpdateStatus={onUpdateStatus}
+              />
+            )}
             <DropdownMenuItem
               onClick={() => onDelete(row.original)}
               className="text-red-600"
@@ -163,8 +181,6 @@ export default function MembersTable({
   );
 }
 
-/** Row-menu items for the account-status lifecycle. Only shows the
- *  transitions that make sense from the user's current status. */
 function AccountStatusItems({
   user,
   onUpdateStatus,
@@ -173,12 +189,36 @@ function AccountStatusItems({
   onUpdateStatus: (user: IUser, status: AccountStatus) => void;
 }) {
   const current = (user.accountStatus ?? "ACTIVE") as AccountStatus;
-  const items: Array<{ label: string; status: AccountStatus; icon: React.ReactNode }> = [];
+  const items: Array<{
+    label: string;
+    status: AccountStatus;
+    icon: React.ReactNode;
+  }> = [];
 
-  if (current !== "ACTIVE") items.push({ label: "Restore (Active)", status: "ACTIVE", icon: <RotateCcw className="h-4 w-4 mr-2" /> });
-  if (current !== "SUSPENDED" && current !== "ARCHIVED") items.push({ label: "Suspend", status: "SUSPENDED", icon: <Ban className="h-4 w-4 mr-2" /> });
-  if (current !== "INACTIVE" && current !== "ARCHIVED") items.push({ label: "Mark Inactive", status: "INACTIVE", icon: <CircleSlash className="h-4 w-4 mr-2" /> });
-  if (current !== "ARCHIVED") items.push({ label: "Archive", status: "ARCHIVED", icon: <Archive className="h-4 w-4 mr-2" /> });
+  if (current !== "ACTIVE")
+    items.push({
+      label: "Restore (Active)",
+      status: "ACTIVE",
+      icon: <RotateCcw className="h-4 w-4 mr-2" />,
+    });
+  if (current !== "SUSPENDED" && current !== "ARCHIVED")
+    items.push({
+      label: "Suspend",
+      status: "SUSPENDED",
+      icon: <Ban className="h-4 w-4 mr-2" />,
+    });
+  if (current !== "INACTIVE" && current !== "ARCHIVED")
+    items.push({
+      label: "Mark Inactive",
+      status: "INACTIVE",
+      icon: <CircleSlash className="h-4 w-4 mr-2" />,
+    });
+  if (current !== "ARCHIVED")
+    items.push({
+      label: "Archive",
+      status: "ARCHIVED",
+      icon: <Archive className="h-4 w-4 mr-2" />,
+    });
 
   if (items.length === 0) return null;
 
@@ -186,7 +226,10 @@ function AccountStatusItems({
     <>
       <DropdownMenuSeparator />
       {items.map((it) => (
-        <DropdownMenuItem key={it.status} onClick={() => onUpdateStatus(user, it.status)}>
+        <DropdownMenuItem
+          key={it.status}
+          onClick={() => onUpdateStatus(user, it.status)}
+        >
           {it.icon} {it.label}
         </DropdownMenuItem>
       ))}
