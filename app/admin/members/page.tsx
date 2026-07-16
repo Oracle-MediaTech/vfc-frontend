@@ -29,10 +29,6 @@ import { BulkImportDialog } from "./_components/BulkImportDialog";
 import { RegisterMemberDialog } from "./_components/RegisterMemberDialog";
 import { EditMemberDialog } from "./_components/EditMemberDialog";
 
-// Members view is scoped to churchStatus=MEMBER. First timers + visitors live
-// at /admin/visitors so the lists stay focused. Default accountStatus filter
-// to ACTIVE so suspended/archived users don't clutter the list — admins can
-// flip to "all" or a specific status when needed.
 const MEMBERS_ONLY: UserFilterParams = {
   page: 1,
   limit: 20,
@@ -43,7 +39,11 @@ const MEMBERS_ONLY: UserFilterParams = {
 export default function MembersPage() {
   const [members, setMembers] = useState<IUser[]>([]);
   const [loading, setLoading] = useState(true);
-  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
+  const [pagination, setPagination] = useState({
+    page: 1,
+    totalPages: 1,
+    total: 0,
+  });
   const [filters, setFilters] = useState<UserFilterParams>(MEMBERS_ONLY);
 
   // Dialog states
@@ -57,9 +57,14 @@ export default function MembersPage() {
   const fetchMembers = useCallback(async () => {
     setLoading(true);
     try {
-      const result: PaginatedData<IUser> = await userService.getFilteredUsers(filters);
+      const result: PaginatedData<IUser> =
+        await userService.getFilteredUsers(filters);
       setMembers(result.data);
-      setPagination({ page: result.page, totalPages: result.totalPages, total: result.total });
+      setPagination({
+        page: result.page,
+        totalPages: result.totalPages,
+        total: result.total,
+      });
     } catch {
       // Error handled by handleApiCall
     } finally {
@@ -90,7 +95,10 @@ export default function MembersPage() {
     }));
   };
 
-  const handleChurchJourneySave = async (id: string, data: UpdateChurchJourneyPayload) => {
+  const handleChurchJourneySave = async (
+    id: string,
+    data: UpdateChurchJourneyPayload,
+  ) => {
     await userService.updateChurchJourney(id, data);
     fetchMembers();
   };
@@ -105,7 +113,8 @@ export default function MembersPage() {
   };
 
   const handleDelete = async (user: IUser) => {
-    if (!user.id || !confirm(`Delete ${user.firstName} ${user.lastName}?`)) return;
+    if (!user.id || !confirm(`Delete ${user.firstName} ${user.lastName}?`))
+      return;
     await userService.deleteUser(user.id);
     fetchMembers();
   };
@@ -135,7 +144,8 @@ export default function MembersPage() {
 
   const handleUpdateStatus = async (user: IUser, status: AccountStatus) => {
     if (!user.id) return;
-    if (!confirm(`Set ${user.firstName} ${user.lastName} to ${status}?`)) return;
+    if (!confirm(`Set ${user.firstName} ${user.lastName} to ${status}?`))
+      return;
     await userService.updateAccountStatus(user.id, status);
     fetchMembers();
   };
@@ -148,6 +158,8 @@ export default function MembersPage() {
           <p className="text-gray-500">
             {pagination.total} total members
           </p>
+          <h1 className="text-3xl font-bold">Members</h1>
+          <p className="text-gray-500">{pagination.total} total members</p>
         </div>
         {/* <div className="flex gap-2">
           <Button onClick={() => setShowRegister(true)}>
@@ -190,17 +202,18 @@ export default function MembersPage() {
         </div>
 
         <Select
-          value={filters.role || "ALL"}
-          onValueChange={(v) => handleFilterChange("role", v)}
+          value={filters.membershipType || "ALL"}
+          onValueChange={(v) => handleFilterChange("membershipType", v)}
         >
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Role" />
+          <SelectTrigger className="w-[140px]">
+            <SelectValue placeholder="Membership Type" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="ALL">All Roles</SelectItem>
-            <SelectItem value="MEMBER">Member</SelectItem>
+            <SelectItem value="ALL">All Types</SelectItem>
+            <SelectItem value="NON_WORKER">Non-Worker</SelectItem>
             <SelectItem value="WORKER">Worker</SelectItem>
-            <SelectItem value="ADMIN">Admin</SelectItem>
           </SelectContent>
         </Select>
 
@@ -224,6 +237,9 @@ export default function MembersPage() {
       {/* Table */}
       {loading ? (
         <div className="overflow-x-auto rounded-lg border">Loading members...</div>
+        <div className="text-center py-12 text-gray-500">
+          Loading members...
+        </div>
       ) : (
         <MembersTable
           data={members}
@@ -244,7 +260,9 @@ export default function MembersPage() {
             variant="outline"
             size="sm"
             disabled={pagination.page <= 1}
-            onClick={() => setFilters((p) => ({ ...p, page: (p.page || 1) - 1 }))}
+            onClick={() =>
+              setFilters((p) => ({ ...p, page: (p.page || 1) - 1 }))
+            }
           >
             Previous
           </Button>
@@ -256,7 +274,9 @@ export default function MembersPage() {
             variant="outline"
             size="sm"
             disabled={pagination.page >= pagination.totalPages}
-            onClick={() => setFilters((p) => ({ ...p, page: (p.page || 1) + 1 }))}
+            onClick={() =>
+              setFilters((p) => ({ ...p, page: (p.page || 1) + 1 }))
+            }
           >
             Next
           </Button>
@@ -268,7 +288,7 @@ export default function MembersPage() {
       
         open={!!editUser}
         onOpenChange={(open) => !open && setEditUser(null)}
-        user={editUser}
+        userData={editUser}
         onSave={handleEditMemberSave}
       />
 
