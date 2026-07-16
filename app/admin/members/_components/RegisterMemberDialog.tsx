@@ -27,23 +27,10 @@ export function RegisterMemberDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="
-             w-[calc(100vw-1.5rem)]
-    max-w-2xl
-    max-h-[90dvh]
-    overflow-y-auto
-    rounded-xl
-    p-10
-
-        "
-      >
-        <DialogHeader className="">
-          <DialogTitle className="text-xl font-semibold">
-            Register New Member
-          </DialogTitle>
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Register New Member</DialogTitle>
         </DialogHeader>
-
         <RegistrationForm
           onSubmit={handleRegister}
           submitLabel="Register Member"
