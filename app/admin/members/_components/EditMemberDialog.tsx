@@ -31,11 +31,13 @@ import {
 } from "@/types/user";
 import { IDepartment } from "@/types/department";
 import { departmentService } from "@/services/departmentService";
+import { DeptPicker } from "./DeptPicker";
+import { userService } from "@/services/userService";
 
 interface EditMemberDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  user: IUser | null;
+  userData: IUser | null;
   onSave: (id: string, payload: UpdateUserPayload) => Promise<void>;
 }
 
@@ -88,11 +90,16 @@ const toDateInput = (v?: string | Date | null) => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 };
 
-const seedForm = (user: IUser | null, allDepartments: IDepartment[]): FormState => {
+const seedForm = (
+  user: IUser | null,
+  allDepartments: IDepartment[],
+): FormState => {
   if (!user) return emptyForm;
   // Some lists serve a member without the full M2M arrays. Fall back to empty.
   const pickIds = (rel?: IDepartmentRef[]) =>
-    rel?.map((d) => d.id).filter((id) => allDepartments.some((dep) => dep.id === id)) ?? [];
+    rel
+      ?.map((d) => d.id)
+      .filter((id) => allDepartments.some((dep) => dep.id === id)) ?? [];
 
   return {
     firstName: user.firstName ?? "",
@@ -116,114 +123,29 @@ const seedForm = (user: IUser | null, allDepartments: IDepartment[]): FormState 
   };
 };
 
-// ----- Inline multi-select with search + chips -----
-
-interface DeptPickerProps {
-  label: string;
-  hint?: string;
-  options: IDepartment[];
-  value: string[];
-  onChange: (next: string[]) => void;
-}
-
-function DeptPicker({ label, hint, options, value, onChange }: DeptPickerProps) {
-  const [search, setSearch] = useState("");
-
-  const filtered = useMemo(
-    () =>
-      options.filter((d) => d.name.toLowerCase().includes(search.toLowerCase())),
-    [options, search],
-  );
-
-  const toggle = (id: string) => {
-    if (value.includes(id)) onChange(value.filter((v) => v !== id));
-    else onChange([...value, id]);
-  };
-
-  const selectedDepts = useMemo(
-    () => options.filter((d) => value.includes(d.id)),
-    [options, value],
-  );
-
-  return (
-    <div className="space-y-2">
-      <Label>{label}</Label>
-      {hint && <p className="text-xs text-gray-500">{hint}</p>}
-
-      {selectedDepts.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {selectedDepts.map((d) => (
-            <span
-              key={d.id}
-              className="inline-flex items-center gap-1 pl-2 pr-1 py-0.5 bg-emerald-50 text-emerald-700 text-xs rounded-full border border-emerald-200"
-            >
-              {d.name}
-              <button
-                type="button"
-                onClick={() => toggle(d.id)}
-                className="hover:text-red-500"
-                aria-label={`Remove ${d.name}`}
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </span>
-          ))}
-        </div>
-      )}
-
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-        <Input
-          placeholder="Search departments..."
-          className="pl-9"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
-
-      <div className="border rounded-lg max-h-[140px] overflow-y-auto divide-y">
-        {filtered.length === 0 ? (
-          <p className="text-xs text-gray-400 text-center py-3">
-            No departments match
-          </p>
-        ) : (
-          filtered.map((d) => {
-            const checked = value.includes(d.id);
-            return (
-              <label
-                key={d.id}
-                className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 cursor-pointer text-sm"
-              >
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  onChange={() => toggle(d.id)}
-                  className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
-                />
-                <span>{d.name}</span>
-              </label>
-            );
-          })
-        )}
-      </div>
-    </div>
-  );
-}
-
 // ----- Main dialog -----
 
 export function EditMemberDialog({
   open,
   onOpenChange,
-  user,
+  userData,
   onSave,
 }: EditMemberDialogProps) {
+  const [user, setUser] = useState<IUser | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [departments, setDepartments] = useState<IDepartment[]>([]);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!open) return;
+
+    console.log("Fetching user and departments for EditMemberDialog", userData);
+
+    userService
+      .getUserById(userData?.id || "")
+      .then((res) => setUser(res ?? null))
+      .catch(() => setUser(null));
+
     departmentService
       .getAllDepartments({ page: 1, limit: 100 })
       .then((res) => setDepartments(res.data ?? []))
@@ -259,7 +181,9 @@ export function EditMemberDialog({
         churchStatus: form.churchStatus || undefined,
         membershipType: form.membershipType || undefined,
         workerType:
-          form.membershipType === "WORKER" ? form.workerType || undefined : undefined,
+          form.membershipType === "WORKER"
+            ? form.workerType || undefined
+            : undefined,
         // Always send arrays — empty array means "no departments" and clears the M2M.
         departmentIds: form.departmentIds,
         headDepartmentIds: form.headDepartmentIds,
@@ -383,7 +307,9 @@ export function EditMemberDialog({
 
           {/* Role + Journey */}
           <section className="space-y-3 border-t pt-4">
-            <h3 className="text-sm font-semibold text-gray-700">Role &amp; Journey</h3>
+            <h3 className="text-sm font-semibold text-gray-700">
+              Role &amp; Journey
+            </h3>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Role</Label>
@@ -405,7 +331,9 @@ export function EditMemberDialog({
                 <Label>Church Status</Label>
                 <Select
                   value={form.churchStatus || ""}
-                  onValueChange={(v) => setField("churchStatus", v as ChurchStatus)}
+                  onValueChange={(v) =>
+                    setField("churchStatus", v as ChurchStatus)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />
@@ -439,7 +367,9 @@ export function EditMemberDialog({
                   <Label>Worker Type</Label>
                   <Select
                     value={form.workerType || ""}
-                    onValueChange={(v) => setField("workerType", v as WorkerType)}
+                    onValueChange={(v) =>
+                      setField("workerType", v as WorkerType)
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select worker type" />
@@ -482,7 +412,11 @@ export function EditMemberDialog({
         </div>
 
         <DialogFooter className="border-t pt-3">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={saving}
+          >
             Cancel
           </Button>
           <Button onClick={handleSave} disabled={saving}>
