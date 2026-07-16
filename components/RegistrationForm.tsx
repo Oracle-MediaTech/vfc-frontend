@@ -83,7 +83,7 @@ export function RegistrationForm({
         onSubmit={form.handleSubmit(handleSubmit)}
         className="space-y-5"
       >
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="firstName"
