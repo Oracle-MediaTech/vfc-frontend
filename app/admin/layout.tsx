@@ -1,35 +1,34 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import Sidebar from "@/components/Sidebar"; // This matches your components/Sidebar folder
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Menu, X, LogOut, Church } from "lucide-react";
-import Sidebar from "@/components/Sidebar";
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const pathname = usePathname();
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Sidebar */}
-      <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Admin Sidebar */}
+      <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />
 
-      {/* Main Content */}
-      <main
+      {/* Dynamic Page Content Wrapper */}
+      <div
         className={cn(
-          "transition-all duration-200",
-          isSidebarOpen ? "ml-64" : "ml-16"
+          "flex-1 min-h-screen flex flex-col",
+          "transition-all duration-300 ease-out",
+          "pl-0", // No padding on mobile
+          isOpen ? "md:pl-64" : "md:pl-16" // Adjusts padding on desktop when sidebar collapses
         )}
       >
-        <div className="p-8">{children}</div>
-      </main>
+        <main className="flex-1 p-4 md:p-8 w-full max-w-7xl mx-auto">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

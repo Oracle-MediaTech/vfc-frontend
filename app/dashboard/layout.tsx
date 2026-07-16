@@ -1,27 +1,34 @@
 "use client";
 
 import { useState } from "react";
+import WorkerSidebar from "@/components/WorkerSidebar"; 
 import { cn } from "@/lib/utils";
-import WorkerSidebar from "@/components/WorkerSidebar";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <WorkerSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
-      <main
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Worker Sidebar */}
+      <WorkerSidebar isOpen={isOpen} setIsOpen={setIsOpen} />
+
+
+      <div
         className={cn(
-          "transition-all duration-200",
-          isSidebarOpen ? "ml-64" : "ml-16",
+          "flex-1 min-h-screen flex flex-col",
+          "transition-all duration-300 ease-out",
+          "pl-0", 
+          isOpen ? "md:pl-64" : "md:pl-16" 
         )}
       >
-        <div className="p-8">{children}</div>
-      </main>
+        <main className="flex-1 p-4 md:p-8 w-full max-w-7xl mx-auto">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }
