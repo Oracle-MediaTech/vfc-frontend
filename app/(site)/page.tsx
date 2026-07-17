@@ -14,11 +14,12 @@ import {
    PlayCircle,
    Sparkles,
 } from "lucide-react";
-import { useServiceDay } from "@/hooks/use-church-settings";
+import useChurchSettings, { useServiceDay } from "@/hooks/use-church-settings";
 import { ordinal } from "@/lib/utils";
 
 export default function Home() {
    const { serviceDays, isLoading } = useServiceDay();
+   const { settings, isLoading: isSettingsLoading } = useChurchSettings();
 
    const features = [
       {
@@ -218,10 +219,10 @@ export default function Home() {
                                       <Clock className="h-6 w-6 text-primary" />
                                    </div>
                                    <div className="flex-1">
-                                      <p className="font-semibold text-foreground">
+                                      <p className="font-semibold text-foreground text-sm">
                                          {service.name}
                                       </p>
-                                      <div className="text-sm text-muted-foreground">
+                                      <div className="text-xs text-muted-foreground">
                                          {service.services.length <= 1 ? (
                                             <>
                                                {service.weekday} &middot;{" "}
@@ -268,8 +269,14 @@ export default function Home() {
                         <div className="absolute inset-0 bg-gradient-to-t from-primary/60 to-transparent" />
                         <div className="absolute bottom-0 left-0 right-0 p-8">
                            <div className="flex items-center gap-2 text-white/90 text-sm mb-2">
-                              <MapPin className="h-4 w-4" />
-                              <span>Amassoma, Bayelsa State</span>
+                              {isSettingsLoading ? (
+                                 <Skeleton className="h-4 w-24" />
+                              ) : (
+                                 <>
+                                    <MapPin className="h-4 w-4" />
+                                    <span>{settings?.address}</span>
+                                 </>
+                              )}
                            </div>
                            <p className="text-white text-xl font-bold">
                               Everyone is Welcome
