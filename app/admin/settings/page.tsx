@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChurchInfoTab } from "./_components/ChurchInfoTab";
 import { ServiceDaysTab } from "./_components/ServiceDaysTab";
 import { SpecialProgramsTab } from "./_components/SpecialProgramsTab";
+import { Socials } from "./_components/Socials";
 
 export default function SettingsPage() {
    return (
@@ -38,7 +39,7 @@ export default function SettingsPage() {
             </TabsContent>
 
             <TabsContent value="socials">
-               <SpecialProgramsTab />
+               <Socials />
             </TabsContent>
          </Tabs>
       </div>
