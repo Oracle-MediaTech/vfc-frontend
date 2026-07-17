@@ -16,7 +16,7 @@ import useChurchSettings, { useServiceDay } from "@/hooks/use-church-settings";
 import { ordinal } from "@/lib/utils";
 
 const Footer = () => {
-      const settings = useChurchSettings();
+   const settings = useChurchSettings();
    const serviceDays = useServiceDay();
 
    return (
@@ -96,19 +96,19 @@ const Footer = () => {
                      <li className="flex items-start gap-3">
                         <MapPin className="h-5 w-5 text-gold shrink-0 mt-0.5" />
                         <span className="text-gray-400 text-sm">
-                           Amassoma, Bayelsa State, Nigeria
+                           {settings?.address || ""}
                         </span>
                      </li>
                      <li className="flex items-center gap-3">
                         <Phone className="h-5 w-5 text-gold shrink-0" />
                         <span className="text-gray-400 text-sm">
-                           +234 XXX XXX XXXX
+                           {settings?.phoneNumber || ""}
                         </span>
                      </li>
                      <li className="flex items-center gap-3">
                         <Mail className="h-5 w-5 text-gold shrink-0" />
                         <span className="text-gray-400 text-sm">
-                           info@visionfamilychurch.org
+                           {settings?.email || ""}
                         </span>
                      </li>
                   </ul>
