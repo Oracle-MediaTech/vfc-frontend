@@ -14,10 +14,15 @@ import {
 } from "lucide-react";
 import useChurchSettings, { useServiceDay } from "@/hooks/use-church-settings";
 import { ordinal } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Footer = () => {
-   const settings = useChurchSettings();
-   const serviceDays = useServiceDay();
+   const { settings, isLoading } = useChurchSettings();
+   const { serviceDays, isLoading: isServiceDaysLoading } = useServiceDay();
+
+   if (isLoading || isServiceDaysLoading) {
+      return <FooterSkeleton />;
+   }
 
    return (
       <footer className="relative bg-gray-950 text-white overflow-hidden">
@@ -138,14 +143,14 @@ const Footer = () => {
                                  </>
                               ) : (
                                  <>
-                                    <p>{service.weekday}</p>
+                                    <span>{service.weekday}</span>
 
                                     {service.services.map((s, index) => (
-                                       <p key={s.id} className="ml-3">
+                                       <span key={s.id} className="ml-3 block">
                                           {ordinal(index + 1)} Service{" "}
                                           {s.serviceTime}
                                           {s.closesAt && ` - ${s.closesAt}`}
-                                       </p>
+                                       </span>
                                     ))}
                                  </>
                               )}
@@ -172,3 +177,75 @@ const Footer = () => {
 };
 
 export default Footer;
+
+const FooterSkeleton = () => {
+   return (
+      <footer className="relative bg-gray-950 text-white overflow-hidden">
+         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold/50 to-transparent" />
+         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-40 bg-primary/10 rounded-full blur-3xl" />
+
+         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+               <div className="lg:col-span-1">
+                  <div className="flex items-center gap-2 mb-4">
+                     <Skeleton className="h-10 w-10 rounded-lg bg-white/10" />
+                     <Skeleton className="h-6 w-32" />
+                  </div>
+                  <Skeleton className="h-4 w-full mb-2" />
+                  <Skeleton className="h-4 w-3/4 mb-6" />
+                  <div className="flex gap-3">
+                     {[1, 2, 3, 4].map((i) => (
+                        <Skeleton key={i} className="h-10 w-10 rounded-lg" />
+                     ))}
+                  </div>
+               </div>
+
+               <div>
+                  <Skeleton className="h-4 w-24 mb-6" />
+                  <ul className="space-y-3">
+                     {[1, 2, 3, 4, 5, 6].map((i) => (
+                        <li key={i}>
+                           <Skeleton className="h-4 w-24" />
+                        </li>
+                     ))}
+                  </ul>
+               </div>
+
+               <div>
+                  <Skeleton className="h-4 w-28 mb-6" />
+                  <ul className="space-y-4">
+                     {[1, 2, 3].map((i) => (
+                        <li key={i} className="flex items-center gap-3">
+                           <Skeleton className="h-5 w-5 rounded-full" />
+                           <Skeleton className="h-4 w-32" />
+                        </li>
+                     ))}
+                  </ul>
+               </div>
+
+               <div>
+                  <Skeleton className="h-4 w-32 mb-6" />
+                  <div className="space-y-4">
+                     {[1, 2, 3].map((index) => (
+                        <div
+                           key={index}
+                           className="p-4 rounded-lg bg-white/5 border border-white/5"
+                        >
+                           <Skeleton className="h-4 w-24 mb-2" />
+                           <Skeleton className="h-3 w-36" />
+                        </div>
+                     ))}
+                  </div>
+               </div>
+            </div>
+
+            <div className="py-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+               <Skeleton className="h-4 w-56" />
+               <Skeleton className="h-4 w-36" />
+            </div>
+         </div>
+      </footer>
+   );
+};
+
+export { FooterSkeleton };

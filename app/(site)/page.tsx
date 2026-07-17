@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
    Calendar,
    Heart,
@@ -17,7 +18,7 @@ import { useServiceDay } from "@/hooks/use-church-settings";
 import { ordinal } from "@/lib/utils";
 
 export default function Home() {
-   const serviceDays = useServiceDay();
+   const { serviceDays, isLoading } = useServiceDay();
 
    const features = [
       {
@@ -195,44 +196,65 @@ export default function Home() {
                      </p>
 
                      <div className="space-y-4">
-                        {serviceDays.map((service, index) => (
-                           <div
-                              key={service.id}
-                              className="flex items-center gap-4 p-5 rounded-xl bg-white border border-border/50 card-hover"
-                           >
-                              <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                                 <Clock className="h-6 w-6 text-primary" />
-                              </div>
-                              <div className="flex-1">
-                                 <p className="font-semibold text-foreground">
-                                    {service.name}
-                                 </p>
-                                 <div className="text-sm text-muted-foreground">
-                                    {service.services.length <= 1 ? (
-                                       <>
-                                          {service.weekday} &middot;{" "}
-                                          {service.services[0]?.serviceTime}
-                                          {service.services[0]?.closesAt &&
-                                             ` - ${service.services[0].closesAt}`}
-                                       </>
-                                    ) : (
-                                       <>
-                                          <p>{service.weekday}</p>
+                        {isLoading
+                           ? [1, 2, 3].map((item) => (
+                                <div
+                                   key={item}
+                                   className="flex items-center gap-4 p-5 rounded-xl bg-white border border-border/50"
+                                >
+                                   <Skeleton className="h-14 w-14 rounded-xl" />
+                                   <div className="flex-1 space-y-2">
+                                      <Skeleton className="h-4 w-28" />
+                                      <Skeleton className="h-3 w-40" />
+                                   </div>
+                                </div>
+                             ))
+                           : serviceDays.map((service) => (
+                                <div
+                                   key={service.id}
+                                   className="flex items-center gap-4 p-5 rounded-xl bg-white border border-border/50 card-hover"
+                                >
+                                   <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                                      <Clock className="h-6 w-6 text-primary" />
+                                   </div>
+                                   <div className="flex-1">
+                                      <p className="font-semibold text-foreground">
+                                         {service.name}
+                                      </p>
+                                      <div className="text-sm text-muted-foreground">
+                                         {service.services.length <= 1 ? (
+                                            <>
+                                               {service.weekday} &middot;{" "}
+                                               {
+                                                  service.services[0]
+                                                     ?.serviceTime
+                                               }
+                                               {service.services[0]?.closesAt &&
+                                                  ` - ${service.services[0].closesAt}`}
+                                            </>
+                                         ) : (
+                                            <>
+                                               <p>{service.weekday}</p>
 
-                                          {service.services.map((s, index) => (
-                                             <p key={s.id} className="ml-3">
-                                                {ordinal(index + 1)} Service{" "}
-                                                {s.serviceTime}
-                                                {s.closesAt &&
-                                                   ` - ${s.closesAt}`}
-                                             </p>
-                                          ))}
-                                       </>
-                                    )}
-                                 </div>
-                              </div>
-                           </div>
-                        ))}
+                                               {service.services.map(
+                                                  (s, index) => (
+                                                     <p
+                                                        key={s.id}
+                                                        className="ml-3"
+                                                     >
+                                                        {ordinal(index + 1)}{" "}
+                                                        Service {s.serviceTime}
+                                                        {s.closesAt &&
+                                                           ` - ${s.closesAt}`}
+                                                     </p>
+                                                  ),
+                                               )}
+                                            </>
+                                         )}
+                                      </div>
+                                   </div>
+                                </div>
+                             ))}
                      </div>
                   </div>
 

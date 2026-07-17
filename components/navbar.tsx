@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Menu, X, Church } from "lucide-react";
 import { cn } from "@/lib/utils";
 import useChurchSettings from "@/hooks/use-church-settings";
+import { Skeleton } from "./ui/skeleton";
 
 const navLinks = [
    { href: "/", label: "Home" },
@@ -21,7 +22,7 @@ const Navbar = () => {
    const [isOpen, setIsOpen] = useState(false);
    const [isScrolled, setIsScrolled] = useState(false);
    const pathname = usePathname();
-   const settings = useChurchSettings();
+   const { settings, isLoading } = useChurchSettings();
 
    useEffect(() => {
       const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -53,7 +54,11 @@ const Navbar = () => {
                      </div>
                      <div className="flex flex-col">
                         <span className="font-bold text-lg leading-tight transition-colors duration-300 text-foreground">
-                           {settings?.name || ""}
+                           {isLoading ? (
+                              <Skeleton className="h-5 w-24 mb-2" />
+                           ) : (
+                              settings?.name || ""
+                           )}
                         </span>
                         <span className="text-[11px] uppercase tracking-widest leading-tight transition-colors duration-300 text-muted-foreground">
                            Church
