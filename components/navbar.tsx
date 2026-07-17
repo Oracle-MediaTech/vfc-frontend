@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Church } from "lucide-react";
 import { cn } from "@/lib/utils";
+import useChurchSettings from "@/hooks/use-church-settings";
 
 const navLinks = [
    { href: "/", label: "Home" },
@@ -20,6 +21,7 @@ const Navbar = () => {
    const [isOpen, setIsOpen] = useState(false);
    const [isScrolled, setIsScrolled] = useState(false);
    const pathname = usePathname();
+   const settings = useChurchSettings();
 
    useEffect(() => {
       const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -39,7 +41,6 @@ const Navbar = () => {
    }, [isOpen]);
 
    const isHome = pathname === "/";
-   const showTransparent = isHome && !isScrolled;
 
    return (
       <>
@@ -52,7 +53,7 @@ const Navbar = () => {
                      </div>
                      <div className="flex flex-col">
                         <span className="font-bold text-lg leading-tight transition-colors duration-300 text-foreground">
-                           Vision Family
+                           {settings?.name || ""}
                         </span>
                         <span className="text-[11px] uppercase tracking-widest leading-tight transition-colors duration-300 text-muted-foreground">
                            Church
