@@ -37,7 +37,7 @@ import { userService } from "@/services/userService";
 interface EditMemberDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  userData: IUser | null;
+  user: IUser | null;
   onSave: (id: string, payload: UpdateUserPayload) => Promise<void>;
 }
 
@@ -128,7 +128,6 @@ const seedForm = (
 export function EditMemberDialog({
   open,
   onOpenChange,
-  userData,
   onSave,
 }: EditMemberDialogProps) {
   const [user, setUser] = useState<IUser | null>(null);
@@ -139,10 +138,10 @@ export function EditMemberDialog({
   useEffect(() => {
     if (!open) return;
 
-    console.log("Fetching user and departments for EditMemberDialog", userData);
+    console.log("Fetching user and departments for EditMemberDialog", user);
 
     userService
-      .getUserById(userData?.id || "")
+      .getUserById(user?.id || "")
       .then((res) => setUser(res ?? null))
       .catch(() => setUser(null));
 

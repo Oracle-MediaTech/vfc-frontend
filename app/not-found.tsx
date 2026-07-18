@@ -29,7 +29,7 @@ export default function NotFound() {
           </p>
         </div>
 
-        {/* Action Buttons: Stacked on mobile, side-by-side on larger screens */}
+    
         <div className="flex flex-col sm:flex-row gap-3 items-center justify-center pt-2">
           <Button
             variant="outline"
