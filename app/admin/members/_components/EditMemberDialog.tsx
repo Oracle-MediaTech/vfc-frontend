@@ -31,6 +31,7 @@ import {
 } from "@/types/user";
 import { IDepartment } from "@/types/department";
 import { departmentService } from "@/services/departmentService";
+import { userService } from "@/services/userService";
 
 interface EditMemberDialogProps {
   open: boolean;
@@ -88,11 +89,16 @@ const toDateInput = (v?: string | Date | null) => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 };
 
-const seedForm = (user: IUser | null, allDepartments: IDepartment[]): FormState => {
+const seedForm = (
+  user: IUser | null,
+  allDepartments: IDepartment[],
+): FormState => {
   if (!user) return emptyForm;
   // Some lists serve a member without the full M2M arrays. Fall back to empty.
   const pickIds = (rel?: IDepartmentRef[]) =>
-    rel?.map((d) => d.id).filter((id) => allDepartments.some((dep) => dep.id === id)) ?? [];
+    rel
+      ?.map((d) => d.id)
+      .filter((id) => allDepartments.some((dep) => dep.id === id)) ?? [];
 
   return {
     firstName: user.firstName ?? "",
@@ -126,12 +132,20 @@ interface DeptPickerProps {
   onChange: (next: string[]) => void;
 }
 
-function DeptPicker({ label, hint, options, value, onChange }: DeptPickerProps) {
+function DeptPicker({
+  label,
+  hint,
+  options,
+  value,
+  onChange,
+}: DeptPickerProps) {
   const [search, setSearch] = useState("");
 
   const filtered = useMemo(
     () =>
-      options.filter((d) => d.name.toLowerCase().includes(search.toLowerCase())),
+      options.filter((d) =>
+        d.name.toLowerCase().includes(search.toLowerCase()),
+      ),
     [options, search],
   );
 
@@ -215,15 +229,23 @@ function DeptPicker({ label, hint, options, value, onChange }: DeptPickerProps) 
 export function EditMemberDialog({
   open,
   onOpenChange,
-  user,
   onSave,
 }: EditMemberDialogProps) {
+  const [user, setUser] = useState<IUser | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [departments, setDepartments] = useState<IDepartment[]>([]);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!open) return;
+
+    console.log("Fetching user and departments for EditMemberDialog", user);
+
+    userService
+      .getUserById(user?.id || "")
+      .then((res) => setUser(res ?? null))
+      .catch(() => setUser(null));
+
     departmentService
       .getAllDepartments({ page: 1, limit: 100 })
       .then((res) => setDepartments(res.data ?? []))
@@ -259,7 +281,9 @@ export function EditMemberDialog({
         churchStatus: form.churchStatus || undefined,
         membershipType: form.membershipType || undefined,
         workerType:
-          form.membershipType === "WORKER" ? form.workerType || undefined : undefined,
+          form.membershipType === "WORKER"
+            ? form.workerType || undefined
+            : undefined,
         // Always send arrays — empty array means "no departments" and clears the M2M.
         departmentIds: form.departmentIds,
         headDepartmentIds: form.headDepartmentIds,
@@ -383,7 +407,9 @@ export function EditMemberDialog({
 
           {/* Role + Journey */}
           <section className="space-y-3 border-t pt-4">
-            <h3 className="text-sm font-semibold text-gray-700">Role &amp; Journey</h3>
+            <h3 className="text-sm font-semibold text-gray-700">
+              Role &amp; Journey
+            </h3>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Role</Label>
@@ -405,7 +431,9 @@ export function EditMemberDialog({
                 <Label>Church Status</Label>
                 <Select
                   value={form.churchStatus || ""}
-                  onValueChange={(v) => setField("churchStatus", v as ChurchStatus)}
+                  onValueChange={(v) =>
+                    setField("churchStatus", v as ChurchStatus)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />
@@ -439,7 +467,9 @@ export function EditMemberDialog({
                   <Label>Worker Type</Label>
                   <Select
                     value={form.workerType || ""}
-                    onValueChange={(v) => setField("workerType", v as WorkerType)}
+                    onValueChange={(v) =>
+                      setField("workerType", v as WorkerType)
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select worker type" />
@@ -482,7 +512,11 @@ export function EditMemberDialog({
         </div>
 
         <DialogFooter className="border-t pt-3">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={saving}
+          >
             Cancel
           </Button>
           <Button onClick={handleSave} disabled={saving}>
