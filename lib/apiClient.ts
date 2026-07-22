@@ -24,24 +24,16 @@ const apiClient: AxiosInstance = axios.create({
 // ✅ Request interceptor
 apiClient.interceptors.request.use(
   (config) => {
-<<<<<<< HEAD
-    const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
-=======
     const token =
       typeof window !== "undefined"
         ? localStorage.getItem("accessToken")
         : null;
->>>>>>> 9b868b3481ec521de7f6ab175aab422f65b58676
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-<<<<<<< HEAD
-  (error: AxiosError) => Promise.reject(error)
-=======
   (error: AxiosError) => Promise.reject(error),
->>>>>>> 9b868b3481ec521de7f6ab175aab422f65b58676
 );
 
 // ✅ Response interceptor
@@ -57,11 +49,7 @@ apiClient.interceptors.response.use(
       }
     }
     return Promise.reject(error);
-<<<<<<< HEAD
-  }
-=======
   },
->>>>>>> 9b868b3481ec521de7f6ab175aab422f65b58676
 );
 
 export default apiClient;
