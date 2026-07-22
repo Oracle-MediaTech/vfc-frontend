@@ -44,7 +44,10 @@ export default function VisitorsPage() {
       const base: UserFilterParams = { page, limit: LIMIT, search };
       if (show === "BOTH") {
         const [a, b] = await Promise.all([
-          userService.getFilteredUsers({ ...base, churchStatus: "FIRST_TIMER" }),
+          userService.getFilteredUsers({
+            ...base,
+            churchStatus: "FIRST_TIMER",
+          }),
           userService.getFilteredUsers({ ...base, churchStatus: "VISITOR" }),
         ]);
         // Merge: stable order by createdAt desc; both responses already sort
@@ -58,7 +61,10 @@ export default function VisitorsPage() {
         setTotalPages(Math.max(a.totalPages, b.totalPages));
         setTotal(a.total + b.total);
       } else {
-        const result = await userService.getFilteredUsers({ ...base, churchStatus: show });
+        const result = await userService.getFilteredUsers({
+          ...base,
+          churchStatus: show,
+        });
         setUsers(result.data);
         setTotalPages(result.totalPages);
         setTotal(result.total);
@@ -84,7 +90,10 @@ export default function VisitorsPage() {
     return () => clearTimeout(timeout);
   }, [searchInput]);
 
-  const handleChurchJourneySave = async (id: string, data: UpdateChurchJourneyPayload) => {
+  const handleChurchJourneySave = async (
+    id: string,
+    data: UpdateChurchJourneyPayload,
+  ) => {
     await userService.updateChurchJourney(id, data);
     fetchUsers();
   };
@@ -99,7 +108,8 @@ export default function VisitorsPage() {
   };
 
   const handleDelete = async (user: IUser) => {
-    if (!user.id || !confirm(`Delete ${user.firstName} ${user.lastName}?`)) return;
+    if (!user.id || !confirm(`Delete ${user.firstName} ${user.lastName}?`))
+      return;
     await userService.deleteUser(user.id);
     fetchUsers();
   };
@@ -188,7 +198,7 @@ export default function VisitorsPage() {
       <EditMemberDialog
         open={!!editUser}
         onOpenChange={(open) => !open && setEditUser(null)}
-        user={editUser}
+        userData={editUser}
         onSave={handleEditSave}
       />
 
