@@ -19,12 +19,8 @@ export default function DepartmentsPage() {
 
   // Dialog states
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [editDepartment, setEditDepartment] = useState<IDepartment | null>(
-    null,
-  );
-  const [manageDepartment, setManageDepartment] = useState<IDepartment | null>(
-    null,
-  );
+  const [editDepartment, setEditDepartment] = useState<IDepartment | null>(null);
+  const [manageDepartment, setManageDepartment] = useState<IDepartment | null>(null);
   const [showImport, setShowImport] = useState(false);
 
   const fetchDepartments = useCallback(async (page = 1) => {
@@ -69,9 +65,7 @@ export default function DepartmentsPage() {
   };
 
   const handleAssignAssistantHead = async (deptId: string, userId: string) => {
-    const updated = await departmentService.assignAssistantHead(deptId, [
-      userId,
-    ]);
+    const updated = await departmentService.assignAssistantHead(deptId, [userId]);
     refreshDepartmentInList(updated);
   };
 
@@ -80,7 +74,7 @@ export default function DepartmentsPage() {
     refreshDepartmentInList(updated);
   };
 
-   const handleRemoveAsstHead = async (deptId: string, userId: string) => {
+  const handleRemoveAsstHead = async (deptId: string, userId: string) => {
     const updated = await departmentService.removeAssistantHead(deptId, [userId]);
     refreshDepartmentInList(updated);
   };
@@ -97,9 +91,8 @@ export default function DepartmentsPage() {
 
   const refreshDepartmentInList = (updated: IDepartment) => {
     setDepartments((prev) =>
-      prev.map((d) => (d.id === updated.id ? updated : d)),
+      prev.map((d) => (d.id === updated.id ? updated : d))
     );
-    // Also refresh the manage dialog if it's open for this department
     if (manageDepartment?.id === updated.id) {
       setManageDepartment(updated);
     }
@@ -113,17 +106,30 @@ export default function DepartmentsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Departments</h1>
-          <p className="text-gray-500">Manage church departments</p>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900">
+            Departments
+          </h1>
+          <p className="text-sm md:text-base text-gray-500 mt-1">
+            Manage church departments
+          </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setShowImport(true)}>
-            <Upload className="h-4 w-4 mr-2" /> Import
+        
+        <div className="flex flex-col sm:flex-row gap-2.5 sm:items-center w-full md:w-auto">
+          <Button 
+            variant="outline" 
+            onClick={() => setShowImport(true)}
+            className="w-full sm:w-auto active:scale-[0.98] transition-all py-2.5 rounded-xl flex items-center justify-center gap-2"
+          >
+            <Upload className="h-4 w-4" /> Import
           </Button>
-          <Button onClick={() => setShowCreateDialog(true)}>
-            <Plus className="h-4 w-4 mr-2" /> New Department
+          <Button 
+            onClick={() => setShowCreateDialog(true)}
+            className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white active:scale-[0.98] transition-all py-2.5 rounded-xl flex items-center justify-center gap-2"
+          >
+            <Plus className="h-4 w-4" /> New Department
           </Button>
         </div>
       </div>
@@ -137,16 +143,20 @@ export default function DepartmentsPage() {
           No departments yet. Create one or import from Excel.
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        // grid for mobile responsivenesss
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {departments.map((dept) => (
-            <Card key={dept.id} className="hover:shadow-md transition-shadow">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <CardTitle className="text-lg">{dept.name}</CardTitle>
-                  <div className="flex gap-1">
+            <Card key={dept.id} className="hover:shadow-md transition-all rounded-2xl border-gray-200/80 bg-white flex flex-col justify-between">
+              <CardHeader className="pb-3 p-5">
+                <div className="flex items-start justify-between gap-2">
+                  <CardTitle className="text-lg font-bold text-gray-900 truncate">
+                    {dept.name}
+                  </CardTitle>
+                  <div className="flex gap-1 shrink-0">
                     <Button
                       variant="ghost"
                       size="icon"
+                      className="h-9 w-9 rounded-lg hover:bg-gray-100 text-gray-600"
                       onClick={() => setEditDepartment(dept)}
                     >
                       <Pencil className="h-4 w-4" />
@@ -154,7 +164,7 @@ export default function DepartmentsPage() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="text-red-500"
+                      className="h-9 w-9 rounded-lg hover:bg-red-50 text-red-500 hover:text-red-600"
                       onClick={() => handleDelete(dept)}
                     >
                       <Trash2 className="h-4 w-4" />
@@ -162,42 +172,56 @@ export default function DepartmentsPage() {
                   </div>
                 </div>
                 {dept.description && (
-                  <p className="text-sm text-gray-500">{dept.description}</p>
+                  <p className="text-sm text-gray-500 line-clamp-2 mt-1.5">
+                    {dept.description}
+                  </p>
                 )}
               </CardHeader>
-              <CardContent className="space-y-3">
-                {/* Head */}
-                <div className="flex items-center gap-2">
-                  <Crown className="h-4 w-4 text-yellow-600" />
-                  <span className="text-sm">
-                    {dept.head
-                      ? `${dept.head.firstName} ${dept.head.lastName}`
-                      : "No head assigned"}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Crown className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm">
-                    {dept.assistantHeads && dept.assistantHeads.length > 0
-                      ? dept.assistantHeads
-                          .map((h) => `${h.firstName} ${h.lastName}`)
-                          .join(", ")
-                      : "No Asst Head assigned"}
-                  </span>
+
+              <CardContent className="space-y-4 p-5 pt-0 mt-auto">
+                <hr className="border-gray-100 -mx-5" />
+                
+            
+                <div className="space-y-2.5">
+                  {/* Head */}
+                  <div className="flex items-start gap-2.5 text-sm text-gray-700">
+                    <Crown className="h-4 w-4 text-yellow-600 shrink-0 mt-0.5" />
+                    <span className="truncate">
+                      <strong className="font-semibold text-gray-900">Head: </strong>
+                      {dept.head
+                        ? `${dept.head.firstName} ${dept.head.lastName}`
+                        : "No head assigned"}
+                    </span>
+                  </div>
+
+                  {/* Asstistant Head */}
+                  <div className="flex items-start gap-2.5 text-sm text-gray-700">
+                    <Crown className="h-4 w-4 text-gray-500 shrink-0 mt-0.5" />
+                    <span className="truncate">
+                      <strong className="font-semibold text-gray-900">Asst: </strong>
+                      {dept.assistantHeads && dept.assistantHeads.length > 0
+                        ? dept.assistantHeads
+                            .map((h) => `${h.firstName} ${h.lastName}`)
+                            .join(", ")
+                        : "No Asst Head assigned"}
+                    </span>
+                  </div>
+
+                  {/* Members count */}
+                  <div className="flex items-center gap-2.5 text-sm text-gray-700">
+                    <Users className="h-4 w-4 text-gray-500 shrink-0" />
+                    <span>
+                      <strong className="font-semibold text-gray-900">Members: </strong>
+                      {dept.members?.length || 0}
+                    </span>
+                  </div>
                 </div>
 
-                {/* Members count */}
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm">
-                    {dept.members?.length || 0} members
-                  </span>
-                </div>
-
+             
                 <Button
                   variant="outline"
                   size="sm"
-                  className="w-full"
+                  className="w-full py-2.5 rounded-xl hover:bg-gray-50 font-medium active:scale-[0.98] transition-all"
                   onClick={() => setManageDepartment(dept)}
                 >
                   Manage Members
@@ -208,23 +232,25 @@ export default function DepartmentsPage() {
         </div>
       )}
 
-      {/* Pagination */}
+      {/* pagination */}
       {pagination.totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex items-center justify-center gap-3 pt-4">
           <Button
             variant="outline"
             size="sm"
+            className="rounded-xl px-4 py-2.5 active:scale-95 transition-transform"
             disabled={pagination.page <= 1}
             onClick={() => fetchDepartments(pagination.page - 1)}
           >
             Previous
           </Button>
-          <span className="text-sm text-gray-500">
-            Page {pagination.page} of {pagination.totalPages}
+          <span className="text-xs sm:text-sm text-gray-500 font-medium">
+            Page {pagination.page} / {pagination.totalPages}
           </span>
           <Button
             variant="outline"
             size="sm"
+            className="rounded-xl px-4 py-2.5 active:scale-95 transition-transform"
             disabled={pagination.page >= pagination.totalPages}
             onClick={() => fetchDepartments(pagination.page + 1)}
           >
@@ -233,7 +259,7 @@ export default function DepartmentsPage() {
         </div>
       )}
 
-      {/* Dialogs */}
+      {/* Dialog  */}
       <DepartmentDialog
         open={showCreateDialog}
         onOpenChange={setShowCreateDialog}

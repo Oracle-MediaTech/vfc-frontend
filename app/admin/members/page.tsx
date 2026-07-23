@@ -280,7 +280,7 @@ export default function MembersPage() {
         open={!!editUser}
         onOpenChange={(open) => !open && setEditUser(null)}
         onSave={handleEditMemberSave}
-        user={editUser}
+        userData={editUser}
       />
 
       <ChurchJourneyDialog

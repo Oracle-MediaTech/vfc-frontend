@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useServiceDay } from "@/hooks/use-church-settings";
 import { ordinal } from "@/lib/utils";
+import Image from "next/image";
 
 export default function Home() {
    const { serviceDays, isLoading } = useServiceDay();
@@ -260,7 +261,7 @@ export default function Home() {
 
                   <div className="relative">
                      <div className="relative rounded-2xl overflow-hidden shadow-2xl">
-                        <img
+                        <Image
                            src="https://images.unsplash.com/photo-1507692049790-de58290a4334?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
                            alt="Church worship"
                            className="w-full h-[500px] object-cover"
@@ -343,7 +344,7 @@ export default function Home() {
                         className="group rounded-2xl overflow-hidden border border-border/50 card-hover"
                      >
                         <div className="relative h-52 overflow-hidden">
-                           <img
+                           <Image
                               src={sermon.image}
                               alt={sermon.title}
                               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
