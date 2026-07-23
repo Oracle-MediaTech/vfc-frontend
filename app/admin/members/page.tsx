@@ -43,7 +43,11 @@ const MEMBERS_ONLY: UserFilterParams = {
 export default function MembersPage() {
   const [members, setMembers] = useState<IUser[]>([]);
   const [loading, setLoading] = useState(true);
-  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
+  const [pagination, setPagination] = useState({
+    page: 1,
+    totalPages: 1,
+    total: 0,
+  });
   const [filters, setFilters] = useState<UserFilterParams>(MEMBERS_ONLY);
 
   // Dialog states
@@ -57,9 +61,14 @@ export default function MembersPage() {
   const fetchMembers = useCallback(async () => {
     setLoading(true);
     try {
-      const result: PaginatedData<IUser> = await userService.getFilteredUsers(filters);
+      const result: PaginatedData<IUser> =
+        await userService.getFilteredUsers(filters);
       setMembers(result.data);
-      setPagination({ page: result.page, totalPages: result.totalPages, total: result.total });
+      setPagination({
+        page: result.page,
+        totalPages: result.totalPages,
+        total: result.total,
+      });
     } catch {
       // Error handled by handleApiCall
     } finally {
@@ -90,7 +99,10 @@ export default function MembersPage() {
     }));
   };
 
-  const handleChurchJourneySave = async (id: string, data: UpdateChurchJourneyPayload) => {
+  const handleChurchJourneySave = async (
+    id: string,
+    data: UpdateChurchJourneyPayload,
+  ) => {
     await userService.updateChurchJourney(id, data);
     fetchMembers();
   };
@@ -105,7 +117,8 @@ export default function MembersPage() {
   };
 
   const handleDelete = async (user: IUser) => {
-    if (!user.id || !confirm(`Delete ${user.firstName} ${user.lastName}?`)) return;
+    if (!user.id || !confirm(`Delete ${user.firstName} ${user.lastName}?`))
+      return;
     await userService.deleteUser(user.id);
     fetchMembers();
   };
@@ -135,39 +148,38 @@ export default function MembersPage() {
 
   const handleUpdateStatus = async (user: IUser, status: AccountStatus) => {
     if (!user.id) return;
-    if (!confirm(`Set ${user.firstName} ${user.lastName} to ${status}?`)) return;
+    if (!confirm(`Set ${user.firstName} ${user.lastName} to ${status}?`))
+      return;
     await userService.updateAccountStatus(user.id, status);
     fetchMembers();
   };
 
   return (
     <div className="p-4 md:p-6 space-y-6">
-     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-         <h1 className="text-2xl md:text-3xl font-bold">Members</h1>
-          <p className="text-gray-500">
-            {pagination.total} total members
-          </p>
+          <h1 className="text-2xl md:text-3xl font-bold">Members</h1>
+          <p className="text-gray-500">{pagination.total} total members</p>
         </div>
-        
-        <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
-  <Button
-    className="w-full sm:w-auto"
-    onClick={() => setShowRegister(true)}
-  >
-    <Plus className="h-4 w-4 mr-2" />
-    Register Member
-  </Button>
 
-  <Button
-    variant="outline"
-    className="w-full sm:w-auto"
-    onClick={() => setShowImport(true)}
-  >
-    <Upload className="h-4 w-4 mr-2" />
-    Bulk Import
-  </Button>
-</div>
+        <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+          <Button
+            className="w-full sm:w-auto"
+            onClick={() => setShowRegister(true)}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Register Member
+          </Button>
+
+          <Button
+            variant="outline"
+            className="w-full sm:w-auto"
+            onClick={() => setShowImport(true)}
+          >
+            <Upload className="h-4 w-4 mr-2" />
+            Bulk Import
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -216,7 +228,9 @@ export default function MembersPage() {
 
       {/* Table */}
       {loading ? (
-        <div className="overflow-x-auto rounded-lg border">Loading members...</div>
+        <div className="overflow-x-auto rounded-lg border">
+          Loading members...
+        </div>
       ) : (
         <MembersTable
           data={members}
@@ -231,13 +245,15 @@ export default function MembersPage() {
 
       {/* Pagination */}
       {pagination.totalPages > 1 && (
-       <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <Button
-          className="w-full sm:w-auto"
+            className="w-full sm:w-auto"
             variant="outline"
             size="sm"
             disabled={pagination.page <= 1}
-            onClick={() => setFilters((p) => ({ ...p, page: (p.page || 1) - 1 }))}
+            onClick={() =>
+              setFilters((p) => ({ ...p, page: (p.page || 1) - 1 }))
+            }
           >
             Previous
           </Button>
@@ -245,11 +261,13 @@ export default function MembersPage() {
             Page {pagination.page} of {pagination.totalPages}
           </span>
           <Button
-          className="w-full sm:w-auto"
+            className="w-full sm:w-auto"
             variant="outline"
             size="sm"
             disabled={pagination.page >= pagination.totalPages}
-            onClick={() => setFilters((p) => ({ ...p, page: (p.page || 1) + 1 }))}
+            onClick={() =>
+              setFilters((p) => ({ ...p, page: (p.page || 1) + 1 }))
+            }
           >
             Next
           </Button>
@@ -259,11 +277,11 @@ export default function MembersPage() {
       {/* Dialogs */}
 
       <EditMemberDialog
-      open={!!editUser}
-      onOpenChange={(open) => !open && setEditUser(null)}
-      onSave={handleEditMemberSave}
-      user={editUser}
-       />
+        open={!!editUser}
+        onOpenChange={(open) => !open && setEditUser(null)}
+        onSave={handleEditMemberSave}
+        userData={editUser}
+      />
 
       <ChurchJourneyDialog
         open={!!journeyUser}

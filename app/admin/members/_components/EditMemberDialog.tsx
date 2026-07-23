@@ -37,7 +37,7 @@ import { userService } from "@/services/userService";
 interface EditMemberDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  user: IUser | null;
+  userData: IUser | null;
   onSave: (id: string, payload: UpdateUserPayload) => Promise<void>;
 }
 
@@ -129,6 +129,7 @@ export function EditMemberDialog({
   open,
   onOpenChange,
   onSave,
+  userData,
 }: EditMemberDialogProps) {
   const [user, setUser] = useState<IUser | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
@@ -141,7 +142,7 @@ export function EditMemberDialog({
     console.log("Fetching user and departments for EditMemberDialog", user);
 
     userService
-      .getUserById(user?.id || "")
+      .getUserById(userData?.id || "")
       .then((res) => setUser(res ?? null))
       .catch(() => setUser(null));
 

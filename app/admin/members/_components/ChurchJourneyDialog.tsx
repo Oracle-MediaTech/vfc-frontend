@@ -33,7 +33,9 @@ export function ChurchJourneyDialog({
   onSave,
 }: ChurchJourneyDialogProps) {
   const [churchStatus, setChurchStatus] = useState(user?.churchStatus || "");
-  const [membershipType, setMembershipType] = useState(user?.membershipType || "");
+  const [membershipType, setMembershipType] = useState(
+    user?.membershipType || "",
+  );
   const [workerType, setWorkerType] = useState(user?.workerType || "");
   const [role, setRole] = useState(user?.role || "");
   const [saving, setSaving] = useState(false);
