@@ -31,6 +31,7 @@ import {
 } from "@/types/user";
 import { IDepartment } from "@/types/department";
 import { departmentService } from "@/services/departmentService";
+import { DeptPicker } from "./DeptPicker";
 import { userService } from "@/services/userService";
 
 interface EditMemberDialogProps {
@@ -121,108 +122,6 @@ const seedForm = (
     assistantDepartmentIds: pickIds(user.assistantDepartments),
   };
 };
-
-// ----- Inline multi-select with search + chips -----
-
-interface DeptPickerProps {
-  label: string;
-  hint?: string;
-  options: IDepartment[];
-  value: string[];
-  onChange: (next: string[]) => void;
-}
-
-function DeptPicker({
-  label,
-  hint,
-  options,
-  value,
-  onChange,
-}: DeptPickerProps) {
-  const [search, setSearch] = useState("");
-
-  const filtered = useMemo(
-    () =>
-      options.filter((d) =>
-        d.name.toLowerCase().includes(search.toLowerCase()),
-      ),
-    [options, search],
-  );
-
-  const toggle = (id: string) => {
-    if (value.includes(id)) onChange(value.filter((v) => v !== id));
-    else onChange([...value, id]);
-  };
-
-  const selectedDepts = useMemo(
-    () => options.filter((d) => value.includes(d.id)),
-    [options, value],
-  );
-
-  return (
-    <div className="space-y-2">
-      <Label>{label}</Label>
-      {hint && <p className="text-xs text-gray-500">{hint}</p>}
-
-      {selectedDepts.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {selectedDepts.map((d) => (
-            <span
-              key={d.id}
-              className="inline-flex items-center gap-1 pl-2 pr-1 py-0.5 bg-emerald-50 text-emerald-700 text-xs rounded-full border border-emerald-200"
-            >
-              {d.name}
-              <button
-                type="button"
-                onClick={() => toggle(d.id)}
-                className="hover:text-red-500"
-                aria-label={`Remove ${d.name}`}
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </span>
-          ))}
-        </div>
-      )}
-
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-        <Input
-          placeholder="Search departments..."
-          className="pl-9"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
-
-      <div className="border rounded-lg max-h-[140px] overflow-y-auto divide-y">
-        {filtered.length === 0 ? (
-          <p className="text-xs text-gray-400 text-center py-3">
-            No departments match
-          </p>
-        ) : (
-          filtered.map((d) => {
-            const checked = value.includes(d.id);
-            return (
-              <label
-                key={d.id}
-                className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 cursor-pointer text-sm"
-              >
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  onChange={() => toggle(d.id)}
-                  className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
-                />
-                <span>{d.name}</span>
-              </label>
-            );
-          })
-        )}
-      </div>
-    </div>
-  );
-}
 
 // ----- Main dialog -----
 
