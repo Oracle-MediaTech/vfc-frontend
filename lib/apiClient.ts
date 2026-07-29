@@ -1,15 +1,70 @@
+// import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
+
+// // Backend always runs on port 3030 on the same host the user is browsing
+// // from — we reuse the page's hostname so the API URL tracks the laptop's
+// // current LAN IP without rebuilds. Works for localhost, LAN IP, or any host.
+// const BACKEND_PORT = 3030;
+
+// function resolveApiUrl(): string {
+//   if (typeof window !== "undefined") {
+//     return `${window.location.protocol}//${window.location.hostname}:${BACKEND_PORT}/api/v1`;
+//   }
+//   // SSR / build-time fallback (no requests fire here anyway in static export)
+//   return "";
+// }
+
+// const apiClient: AxiosInstance = axios.create({
+//   baseURL: resolveApiUrl(),
+//   headers: {
+//     "Content-Type": "application/json",
+//   },
+//   withCredentials: false,
+// });
+
+// // ✅ Request interceptor
+// apiClient.interceptors.request.use(
+//   (config) => {
+//     const token =
+//       typeof window !== "undefined"
+//         ? localStorage.getItem("accessToken")
+//         : null;
+//     if (token) {
+//       config.headers.Authorization = `Bearer ${token}`;
+//     }
+//     return config;
+//   },
+//   (error: AxiosError) => Promise.reject(error),
+// );
+
+// // ✅ Response interceptor
+// apiClient.interceptors.response.use(
+//   (response: AxiosResponse) => response,
+//   async (error: AxiosError) => {
+//     if (error.response?.status === 401) {
+//       // Clear invalid tokens and redirect to login
+//       if (typeof window !== "undefined") {
+//         localStorage.removeItem("accessToken");
+//         localStorage.removeItem("refreshToken");
+//         window.location.href = "/login";
+//       }
+//     }
+//     return Promise.reject(error);
+//   },
+// );
+
+// export default apiClient;
+
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 
-// Backend always runs on port 3030 on the same host the user is browsing
-// from — we reuse the page's hostname so the API URL tracks the laptop's
-// current LAN IP without rebuilds. Works for localhost, LAN IP, or any host.
-const BACKEND_PORT = 3030;
+const BACKEND_PORT = 8000;
 
 function resolveApiUrl(): string {
   if (typeof window !== "undefined") {
-    return `${window.location.protocol}//${window.location.hostname}:${BACKEND_PORT}/api/v1`;
+
+    const host = window.location.hostname || "localhost";
+    const protocol = window.location.protocol || "http:";
+    return `${protocol}//${host}:${BACKEND_PORT}/api/v1`;
   }
-  // SSR / build-time fallback (no requests fire here anyway in static export)
   return "";
 }
 
@@ -21,35 +76,52 @@ const apiClient: AxiosInstance = axios.create({
   withCredentials: false,
 });
 
-// ✅ Request interceptor
 apiClient.interceptors.request.use(
   (config) => {
+
+    if (!config.baseURL && typeof window !== "undefined") {
+      config.baseURL = resolveApiUrl();
+    }
+
     const token =
       typeof window !== "undefined"
         ? localStorage.getItem("accessToken")
         : null;
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error: AxiosError) => Promise.reject(error),
+  (error: AxiosError) => Promise.reject(error)
 );
 
-// ✅ Response interceptor
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error: AxiosError) => {
-    if (error.response?.status === 401) {
-      // Clear invalid tokens and redirect to login
+
+    if (!error.response) {
+      console.error(
+        "Network Error: Unable to reach the server. Is backend running on port 3030?",
+        error.message
+      );
+      return Promise.reject(error);
+    }
+
+
+    if (error.response.status === 401) {
       if (typeof window !== "undefined") {
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        window.location.href = "/login";
+        // Prevent infinite redirect loop if already on /login
+        if (!window.location.pathname.startsWith("/login")) {
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          window.location.href = "/login";
+        }
       }
     }
+
     return Promise.reject(error);
-  },
+  }
 );
 
 export default apiClient;

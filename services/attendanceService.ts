@@ -14,8 +14,33 @@ import {
     MemberAttendancePoint,
     AttendanceTrendPoint,
     AttendanceRatePoint,
+    AttendanceFilterParams
 } from "@/types/attendance";
 import { UpsertIncomePayload } from "@/types/income";
+const triggerBlobDownload = (blob: Blob, filename: string) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+};
+
+const buildFilterQuery = (filters?: AttendanceFilterParams) => {
+    if (!filters) return undefined;
+    const params: Record<string, string> = {};
+    if (filters.departmentIds && filters.departmentIds.length > 0) {
+        params.departmentIds = filters.departmentIds.join(",");
+    }
+    if (filters.gender) params.gender = filters.gender;
+    if (filters.membershipType) params.membershipType = filters.membershipType;
+    if (filters.churchStatus) params.churchStatus = filters.churchStatus;
+    if (filters.lateComers) params.lateComers = "true";
+    if (filters.serviceOrder) params.serviceOrder = String(filters.serviceOrder);
+    return params;
+};
 
 export const attendanceService = {
     startSession: (payload: CreateAttendanceSessionPayload) =>
@@ -40,6 +65,7 @@ export const attendanceService = {
         handleApiCall<PaginatedData<IAttendanceSession>>(
             () => apiClient.get<ApiResponse<PaginatedData<IAttendanceSession>>>("/attendance/sessions", { params })
         ),
+        
 
     getSessionById: (id: string) =>
         handleApiCall<IAttendanceSession>(
@@ -131,4 +157,30 @@ export const attendanceService = {
         handleApiCall<AttendanceRatePoint[]>(
             () => apiClient.get<ApiResponse<AttendanceRatePoint[]>>("/attendance/analytics/rate")
         ),
+        
+
+     exportSessionPdf: async (
+    id: string,
+    sessionName: string,
+    filters?: AttendanceFilterParams
+  ): Promise<ApiResponse<Blob>> => {
+ const response = await apiClient.get(
+  `/attendance/session/${id}/pdf`,
+  {
+    params: filters ? buildFilterQuery(filters) : undefined,
+    responseType: "blob",
+  }
+);
+    const safeName = sessionName ? sessionName.replace(/[^a-z0-9_\-]+/gi, "_") : "session";
+    const dateLabel = new Date().toISOString().slice(0, 10);
+    const fileName = `${safeName}_${dateLabel}.pdf`;
+
+    const blobData = (response.data as unknown) instanceof Blob 
+      ? (response.data as unknown as Blob)
+      : new Blob([response.data as unknown as BlobPart], { type: "application/pdf" });
+
+    triggerBlobDownload(blobData, fileName);
+
+    return response.data;
+  },
 };
