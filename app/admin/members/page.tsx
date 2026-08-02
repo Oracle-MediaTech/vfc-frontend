@@ -258,12 +258,13 @@ export default function MembersPage() {
 
       {/* Dialogs */}
 
+
       <EditMemberDialog
-      open={!!editUser}
-      onOpenChange={(open) => !open && setEditUser(null)}
-      onSave={handleEditMemberSave}
-      user={editUser}
-       />
+        open={!!editUser}
+        onOpenChange={(open) => !open && setEditUser(null)}
+        onSave={handleEditMemberSave}
+        userData={editUser}
+      />
 
       <ChurchJourneyDialog
         open={!!journeyUser}

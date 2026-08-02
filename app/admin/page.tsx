@@ -102,11 +102,9 @@ function AdminDashboard() {
         limit: 1,
       });
 
-      console.log("Latest session response:", res);
 
       if (res.data.length > 0) {
         setSession(res.data[0]);
-        console.log("Session state will be:", res.data[0]);
       }
     } catch (err) {
       console.error("Failed to load latest session:", err);

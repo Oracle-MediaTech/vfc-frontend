@@ -80,7 +80,7 @@ export default function VisitorsPage() {
     fetchUsers();
   }, [fetchUsers]);
 
-  // Debounced search — mirror the members page pattern so behaviour matches.
+  // Debounced search - mirror the members page pattern so behavior matches.
   useEffect(() => {
     const timeout = setTimeout(() => {
       const next = searchInput || undefined;
