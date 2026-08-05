@@ -111,7 +111,6 @@ apiClient.interceptors.response.use(
 
     if (error.response.status === 401) {
       if (typeof window !== "undefined") {
-        // Prevent infinite redirect loop if already on /login
         if (!window.location.pathname.startsWith("/login")) {
           localStorage.removeItem("accessToken");
           localStorage.removeItem("refreshToken");

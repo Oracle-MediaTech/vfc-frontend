@@ -144,3 +144,21 @@ export interface AttendanceRatePoint {
     totalMembers: number;
     rate: number;
 }
+
+export interface ConsecutiveAbsentee {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  churchStatus: string;
+  consecutiveAbsences: number;
+}
+
+export interface ConsecutiveLateComer {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  churchStatus: string;
+  consecutiveLateCount: number;
+}

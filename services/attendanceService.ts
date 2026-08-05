@@ -14,7 +14,9 @@ import {
     MemberAttendancePoint,
     AttendanceTrendPoint,
     AttendanceRatePoint,
-    AttendanceFilterParams
+    AttendanceFilterParams,
+    ConsecutiveAbsentee,
+    ConsecutiveLateComer
 } from "@/types/attendance";
 import { UpsertIncomePayload } from "@/types/income";
 const triggerBlobDownload = (blob: Blob, filename: string) => {
@@ -158,7 +160,23 @@ export const attendanceService = {
             () => apiClient.get<ApiResponse<AttendanceRatePoint[]>>("/attendance/analytics/rate")
         ),
         
+getConsecutiveAbsentees: (params?: { limit?: number }) =>
+  handleApiCall<ConsecutiveAbsentee[]>(
+    () =>
+      apiClient.get<ApiResponse<ConsecutiveAbsentee[]>>(
+        "/attendance/analytics/consecutive-absentees",
+        { params }
+      )
+  ),
 
+  getConsecutiveLateComers: (params?: { limit?: number }) =>
+  handleApiCall<ConsecutiveLateComer[]>(
+    () =>
+      apiClient.get<ApiResponse<ConsecutiveLateComer[]>>(
+        "/attendance/analytics/consecutive-late-comers",
+        { params }
+      )
+  ),
      exportSessionPdf: async (
     id: string,
     sessionName: string,
