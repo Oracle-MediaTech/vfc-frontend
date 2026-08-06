@@ -1,5 +1,13 @@
 import { IUser } from "./user";
 import { ISessionIncome } from "./income";
+export interface AttendanceFilterParams {
+    departmentIds?: string[];
+    gender?: "MALE" | "FEMALE";
+    membershipType?: "WORKER" | "NON_WORKER";
+    churchStatus?: "FIRST_TIMER" | "VISITOR" | "MEMBER";
+    lateComers?: boolean;
+    serviceOrder?: number;
+}
 
 export interface ISessionService {
     id: string;

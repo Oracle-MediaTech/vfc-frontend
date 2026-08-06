@@ -1,13 +1,20 @@
 "use client";
+import { toast } from "sonner";
+import { useCallback } from "react";
+import { useParams } from "react-router-dom";
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Activity, Calendar, Loader2 } from "lucide-react";
+import { Users, Activity, Calendar, Loader2, Download } from "lucide-react";
 import { attendanceService } from "@/services/attendanceService";
 import { userService } from "@/services/userService";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import ExcoHome from "./_components/ExcoHome";
 import AttendanceTrendBlock from "@/components/AttendanceTrendBlock";
+
+import { IAttendanceSession } from "@/types/attendance";
+
+
 
 interface CardData {
   loading: boolean;
@@ -16,6 +23,7 @@ interface CardData {
 }
 
 const empty = (hint?: string): CardData => ({ loading: false, value: "—", hint });
+
 
 export default function AdminDashboardRoute() {
   // Role gate — excos see the read-only dashboard, admins fall through.
@@ -34,10 +42,13 @@ export default function AdminDashboardRoute() {
 function AdminDashboard() {
   const [members, setMembers] = useState<CardData>({ loading: true, value: "…" });
   const [attendees, setAttendees] = useState<CardData>({ loading: true, value: "…" });
+    const { id: sessionId } = useParams<{ id: string }>();
   const [sessionsThisMonth, setSessionsThisMonth] = useState<CardData>({
     loading: true,
     value: "…",
   });
+  const [exporting, setExporting] = useState(false);
+  const [session, setSession] = useState<IAttendanceSession | null>(null);
 
   useEffect(() => {
     // Card 1 — total members
@@ -64,7 +75,7 @@ function AdminDashboard() {
       )
       .catch(() => setAttendees(empty()));
 
-    // Card 3 — sessions this month + chart data (one endpoint, two consumers)
+    // Card 3 — sessions this month + chart data
     attendanceService
       .getAttendanceTrend({ groupBy: "month" })
       .then((rows) => {
@@ -82,6 +93,45 @@ function AdminDashboard() {
       })
       .catch(() => setSessionsThisMonth(empty()));
   }, []);
+
+  useEffect(() => {
+  const loadLatestSession = async () => {
+    try {
+      const res = await attendanceService.getAllSessions({
+        page: 1,
+        limit: 1,
+      });
+
+
+      if (res.data.length > 0) {
+        setSession(res.data[0]);
+      }
+    } catch (err) {
+      console.error("Failed to load latest session:", err);
+    }
+  };
+
+  loadLatestSession();
+}, []);
+ 
+const handleExportPdf = useCallback(async () => {
+  const effectiveId = sessionId || session?.id || (session as any)?._id;
+  if (!session || !effectiveId) {
+    toast.error("Session ID is missing");
+    return;
+  }
+
+  setExporting(true);
+  try {
+    const name = session.serviceName || "Attendance_Report";
+    await attendanceService.exportSessionPdf(effectiveId, name, {});
+    toast.success("PDF exported successfully!");
+  } catch (err: any) {
+    toast.error(err?.response?.data?.message || "Failed to export attendance PDF");
+  } finally {
+    setExporting(false);
+  }
+}, [sessionId, session]);
 
   const renderCard = (
     title: string,
@@ -115,11 +165,28 @@ function AdminDashboard() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold">Dashboard Overview</h1>
-        <p className="text-gray-500">Welcome back, Admin</p>
-      </div>
+      {/* Responsive Page Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold sm:text-3xl">Dashboard Overview</h1>
+          <p className="text-sm text-gray-500">Welcome back, Admin</p>
+        </div>
 
+    {/* pdf button link */}
+        <button
+          onClick={handleExportPdf}
+          disabled={exporting}
+          className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+        >
+          {exporting ? (
+            <Loader2 className="h-4 w-4 animate-spin text-emerald-600" />
+          ) : (
+            <Download className="h-4 w-4 text-gray-600" />
+          )}
+          <span>Export Attendacce PDF</span>
+        </button>
+      </div>
+      
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {renderCard(
           "Total Members",
@@ -141,8 +208,9 @@ function AdminDashboard() {
         )}
       </div>
 
+      {/* Analytics & Trends Section Header */}
       <Card className="animate-fade-up animation-delay-400">
-        <CardHeader>
+        <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle>Attendance Trends</CardTitle>
         </CardHeader>
         <CardContent>
