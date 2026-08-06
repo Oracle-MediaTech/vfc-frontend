@@ -111,6 +111,7 @@ apiClient.interceptors.response.use(
 
     if (error.response.status === 401) {
       if (typeof window !== "undefined") {
+
         if (!window.location.pathname.startsWith("/login")) {
           localStorage.removeItem("accessToken");
           localStorage.removeItem("refreshToken");
