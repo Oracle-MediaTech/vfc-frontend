@@ -56,7 +56,7 @@
 
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 
-const BACKEND_PORT = 8000;
+const BACKEND_PORT = 3030;
 
 function resolveApiUrl(): string {
   if (typeof window !== "undefined") {
