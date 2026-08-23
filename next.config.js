@@ -4,12 +4,12 @@
 // serves the static export from the hosting root — coordinate with infra
 // before this lands in production.
 const nextConfig = {
-  output: 'export',
-  trailingSlash: true,
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  images: { unoptimized: true },
+   output: "export",
+   trailingSlash: true,
+   eslint: {
+      ignoreDuringBuilds: true,
+   },
+   images: { unoptimized: true },
 };
 
 module.exports = nextConfig;
