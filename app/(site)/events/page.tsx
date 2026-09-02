@@ -12,6 +12,7 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function EventsPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -66,7 +67,7 @@ export default function EventsPage() {
   const filteredEvents = events.filter(
     (event) =>
       event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      event.description.toLowerCase().includes(searchTerm.toLowerCase())
+      event.description.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
@@ -128,9 +129,10 @@ export default function EventsPage() {
                   className="group grid grid-cols-1 md:grid-cols-[350px_1fr] rounded-2xl overflow-hidden bg-white border border-border/50 card-hover"
                 >
                   <div className="relative h-64 md:h-full overflow-hidden">
-                    <img
+                    <Image
                       src={event.image}
                       alt={event.title}
+                      fill
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                     <div className="absolute top-4 left-4">
@@ -180,9 +182,7 @@ export default function EventsPage() {
       <section className="py-20 bg-primary text-white">
         <div className="max-w-3xl mx-auto px-4 text-center">
           <Users className="h-12 w-12 mx-auto mb-6 text-gold" />
-          <h2 className="text-3xl font-bold mb-4">
-            Want to Host an Event?
-          </h2>
+          <h2 className="text-3xl font-bold mb-4">Want to Host an Event?</h2>
           <p className="text-white/70 mb-8">
             If you have an idea for a church event or would like to volunteer,
             we&apos;d love to hear from you. Get in touch with our events team.

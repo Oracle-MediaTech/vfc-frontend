@@ -2,133 +2,203 @@ import apiClient from "@/lib/apiClient";
 import { ApiResponse, PaginatedData } from "@/types/api";
 import { handleApiCall } from "@/lib/utils";
 import {
-    BulkMarkAttendancePayload,
-    BulkMarkAttendanceResult,
-    CreateAttendanceSessionPayload,
-    IAttendance,
-    IAttendanceSession,
-    MarkAttendancePayload,
-    UpdateAttendanceSessionPayload,
-    AttendanceSummary,
-    TopMember,
-    MemberAttendancePoint,
-    AttendanceTrendPoint,
-    AttendanceRatePoint,
+  BulkMarkAttendancePayload,
+  BulkMarkAttendanceResult,
+  CreateAttendanceSessionPayload,
+  IAttendance,
+  IAttendanceSession,
+  MarkAttendancePayload,
+  UpdateAttendanceSessionPayload,
+  AttendanceSummary,
+  TopMember,
+  MemberAttendancePoint,
+  AttendanceTrendPoint,
+  AttendanceRatePoint,
+  AttendanceFilterParams,
+  ConsecutiveAbsentee,
+  ConsecutiveLateComer
 } from "@/types/attendance";
 import { UpsertIncomePayload } from "@/types/income";
+const triggerBlobDownload = (blob: Blob, filename: string) => {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+
+const buildFilterQuery = (filters?: AttendanceFilterParams) => {
+  if (!filters) return undefined;
+  const params: Record<string, string> = {};
+  if (filters.departmentIds && filters.departmentIds.length > 0) {
+    params.departmentIds = filters.departmentIds.join(",");
+  }
+  if (filters.gender) params.gender = filters.gender;
+  if (filters.membershipType) params.membershipType = filters.membershipType;
+  if (filters.churchStatus) params.churchStatus = filters.churchStatus;
+  if (filters.lateComers) params.lateComers = "true";
+  if (filters.serviceOrder) params.serviceOrder = String(filters.serviceOrder);
+  return params;
+};
 
 export const attendanceService = {
-    startSession: (payload: CreateAttendanceSessionPayload) =>
-        handleApiCall<IAttendanceSession>(
-            () => apiClient.post<ApiResponse<IAttendanceSession>>("/attendance/session", payload),
-            "Session started successfully!"
-        ),
+  startSession: (payload: CreateAttendanceSessionPayload) =>
+    handleApiCall<IAttendanceSession>(
+      () => apiClient.post<ApiResponse<IAttendanceSession>>("/attendance/session", payload),
+      "Session started successfully!"
+    ),
 
-    markAttendance: (payload: MarkAttendancePayload) =>
-        handleApiCall<{ success: boolean }>(
-            () => apiClient.post<ApiResponse<{ success: boolean }>>("/attendance/mark", payload),
-            "Attendance recorded successfully!"
-        ),
+  markAttendance: (payload: MarkAttendancePayload) =>
+    handleApiCall<{ success: boolean }>(
+      () => apiClient.post<ApiResponse<{ success: boolean }>>("/attendance/mark", payload),
+      "Attendance recorded successfully!"
+    ),
 
-    bulkMarkAttendance: (payload: BulkMarkAttendancePayload) =>
-        handleApiCall<BulkMarkAttendanceResult>(
-            () => apiClient.post<ApiResponse<BulkMarkAttendanceResult>>("/attendance/mark-bulk", payload),
-            "Bulk attendance marked successfully!"
-        ),
+  bulkMarkAttendance: (payload: BulkMarkAttendancePayload) =>
+    handleApiCall<BulkMarkAttendanceResult>(
+      () => apiClient.post<ApiResponse<BulkMarkAttendanceResult>>("/attendance/mark-bulk", payload),
+      "Bulk attendance marked successfully!"
+    ),
 
-    getAllSessions: (params?: { page?: number; limit?: number }) =>
-        handleApiCall<PaginatedData<IAttendanceSession>>(
-            () => apiClient.get<ApiResponse<PaginatedData<IAttendanceSession>>>("/attendance/sessions", { params })
-        ),
+  getAllSessions: (params?: { page?: number; limit?: number }) =>
+    handleApiCall<PaginatedData<IAttendanceSession>>(
+      () => apiClient.get<ApiResponse<PaginatedData<IAttendanceSession>>>("/attendance/sessions", { params })
+    ),
 
-    getSessionById: (id: string) =>
-        handleApiCall<IAttendanceSession>(
-            () => apiClient.get<ApiResponse<IAttendanceSession>>(`/attendance/session/${id}`)
-        ),
 
-    updateSession: (id: string, payload: UpdateAttendanceSessionPayload) =>
-        handleApiCall<IAttendanceSession>(
-            () => apiClient.put<ApiResponse<IAttendanceSession>>(`/attendance/session/${id}`, payload),
-            "Session updated successfully!"
-        ),
+  getSessionById: (id: string) =>
+    handleApiCall<IAttendanceSession>(
+      () => apiClient.get<ApiResponse<IAttendanceSession>>(`/attendance/session/${id}`)
+    ),
 
-    deleteSession: (id: string) =>
-        handleApiCall<{ success: boolean }>(
-            () => apiClient.delete<ApiResponse<{ success: boolean }>>(`/attendance/session/${id}`),
-            "Session deleted successfully!"
-        ),
+  updateSession: (id: string, payload: UpdateAttendanceSessionPayload) =>
+    handleApiCall<IAttendanceSession>(
+      () => apiClient.put<ApiResponse<IAttendanceSession>>(`/attendance/session/${id}`, payload),
+      "Session updated successfully!"
+    ),
 
-    // Edit a single attendance entry (admin: change markedAt and/or serviceOrder)
-    updateAttendance: (
-        id: string,
-        payload: { markedAt?: string; serviceOrder?: number },
-    ) =>
-        handleApiCall<IAttendance>(
-            () => apiClient.put<ApiResponse<IAttendance>>(`/attendance/${id}`, payload),
-            "Attendance updated successfully!"
-        ),
+  deleteSession: (id: string) =>
+    handleApiCall<{ success: boolean }>(
+      () => apiClient.delete<ApiResponse<{ success: boolean }>>(`/attendance/session/${id}`),
+      "Session deleted successfully!"
+    ),
 
-    // Delete a single attendance entry
-    deleteAttendance: (id: string) =>
-        handleApiCall<{ success: boolean }>(
-            () => apiClient.delete<ApiResponse<{ success: boolean }>>(`/attendance/${id}`),
-            "Attendance deleted successfully!"
-        ),
+  // Edit a single attendance entry (admin: change markedAt and/or serviceOrder)
+  updateAttendance: (
+    id: string,
+    payload: { markedAt?: string; serviceOrder?: number },
+  ) =>
+    handleApiCall<IAttendance>(
+      () => apiClient.put<ApiResponse<IAttendance>>(`/attendance/${id}`, payload),
+      "Attendance updated successfully!"
+    ),
 
-    // ----- Income + close/reopen ---------------------------------------------
+  // Delete a single attendance entry
+  deleteAttendance: (id: string) =>
+    handleApiCall<{ success: boolean }>(
+      () => apiClient.delete<ApiResponse<{ success: boolean }>>(`/attendance/${id}`),
+      "Attendance deleted successfully!"
+    ),
 
-    getSessionIncome: (id: string) =>
-        handleApiCall<IAttendanceSession>(
-            () => apiClient.get<ApiResponse<IAttendanceSession>>(`/attendance/session/${id}/income`),
-        ),
+  // ----- Income + close/reopen ---------------------------------------------
 
-    upsertSessionIncome: (id: string, payload: UpsertIncomePayload) =>
-        handleApiCall<IAttendanceSession>(
-            () => apiClient.put<ApiResponse<IAttendanceSession>>(`/attendance/session/${id}/income`, payload),
-            "Income saved!"
-        ),
+  getSessionIncome: (id: string) =>
+    handleApiCall<IAttendanceSession>(
+      () => apiClient.get<ApiResponse<IAttendanceSession>>(`/attendance/session/${id}/income`),
+    ),
 
-    closeSession: (id: string) =>
-        handleApiCall<IAttendanceSession>(
-            () => apiClient.post<ApiResponse<IAttendanceSession>>(`/attendance/session/${id}/close`),
-            "Session closed."
-        ),
+  upsertSessionIncome: (id: string, payload: UpsertIncomePayload) =>
+    handleApiCall<IAttendanceSession>(
+      () => apiClient.put<ApiResponse<IAttendanceSession>>(`/attendance/session/${id}/income`, payload),
+      "Income saved!"
+    ),
 
-    reopenSession: (id: string) =>
-        handleApiCall<IAttendanceSession>(
-            () => apiClient.post<ApiResponse<IAttendanceSession>>(`/attendance/session/${id}/reopen`),
-            "Session reopened."
-        ),
+  closeSession: (id: string) =>
+    handleApiCall<IAttendanceSession>(
+      () => apiClient.post<ApiResponse<IAttendanceSession>>(`/attendance/session/${id}/close`),
+      "Session closed."
+    ),
 
-    // Analytics
-    getAttendanceSummary: () =>
-        handleApiCall<AttendanceSummary>(
-            () => apiClient.get<ApiResponse<AttendanceSummary>>("/attendance/analytics/summary")
-        ),
+  reopenSession: (id: string) =>
+    handleApiCall<IAttendanceSession>(
+      () => apiClient.post<ApiResponse<IAttendanceSession>>(`/attendance/session/${id}/reopen`),
+      "Session reopened."
+    ),
 
-    getTopMembers: (params?: { limit?: number }) =>
-        handleApiCall<TopMember[]>(
-            () => apiClient.get<ApiResponse<TopMember[]>>("/attendance/analytics/top-members", { params })
-        ),
+  // Analytics
+  getAttendanceSummary: () =>
+    handleApiCall<AttendanceSummary>(
+      () => apiClient.get<ApiResponse<AttendanceSummary>>("/attendance/analytics/summary")
+    ),
 
-    getMemberAttendanceHistory: (userId: string) =>
-        handleApiCall<MemberAttendancePoint[]>(
-            () => apiClient.get<ApiResponse<MemberAttendancePoint[]>>(`/attendance/analytics/member-history/${userId}`)
-        ),
+  getTopMembers: (params?: { limit?: number }) =>
+    handleApiCall<TopMember[]>(
+      () => apiClient.get<ApiResponse<TopMember[]>>("/attendance/analytics/top-members", { params })
+    ),
 
-    /** Personal attendance history for the authenticated user. */
-    getMyAttendances: () =>
-        handleApiCall<MemberAttendancePoint[]>(
-            () => apiClient.get<ApiResponse<MemberAttendancePoint[]>>(`/attendance/me`)
-        ),
+  getMemberAttendanceHistory: (userId: string) =>
+    handleApiCall<MemberAttendancePoint[]>(
+      () => apiClient.get<ApiResponse<MemberAttendancePoint[]>>(`/attendance/analytics/member-history/${userId}`)
+    ),
 
-    getAttendanceTrend: (params?: { groupBy?: string, departmentId?: string }) =>
-        handleApiCall<AttendanceTrendPoint[]>(
-            () => apiClient.get<ApiResponse<AttendanceTrendPoint[]>>("/attendance/analytics/trend", { params })
-        ),
+  /** Personal attendance history for the authenticated user. */
+  getMyAttendances: () =>
+    handleApiCall<MemberAttendancePoint[]>(
+      () => apiClient.get<ApiResponse<MemberAttendancePoint[]>>(`/attendance/me`)
+    ),
 
-    getAttendanceRate: () =>
-        handleApiCall<AttendanceRatePoint[]>(
-            () => apiClient.get<ApiResponse<AttendanceRatePoint[]>>("/attendance/analytics/rate")
-        ),
+  getAttendanceTrend: (params?: { groupBy?: string, departmentId?: string }) =>
+    handleApiCall<AttendanceTrendPoint[]>(
+      () => apiClient.get<ApiResponse<AttendanceTrendPoint[]>>("/attendance/analytics/trend", { params })
+    ),
+
+  getAttendanceRate: () =>
+    handleApiCall<AttendanceRatePoint[]>(
+      () => apiClient.get<ApiResponse<AttendanceRatePoint[]>>("/attendance/analytics/rate")
+    ),
+
+  getConsecutiveAbsentees: (params?: { limit?: number }) =>
+    handleApiCall<ConsecutiveAbsentee[]>(
+      () =>
+        apiClient.get<ApiResponse<ConsecutiveAbsentee[]>>(
+          "/attendance/analytics/consecutive-absentees",
+          { params }
+        )
+    ),
+
+  getConsecutiveLateComers: (params?: { limit?: number }) =>
+    handleApiCall<ConsecutiveLateComer[]>(
+      () =>
+        apiClient.get<ApiResponse<ConsecutiveLateComer[]>>(
+          "/attendance/analytics/consecutive-late-comers",
+          { params }
+        )
+    ),
+  exportSessionPdf: async (
+    id: string,
+    sessionName: string,
+    filters?: AttendanceFilterParams
+  ): Promise<ApiResponse<Blob>> => {
+    const response = await apiClient.get(
+      `/attendance/session/${id}/pdf`,
+      {
+        params: filters ? buildFilterQuery(filters) : undefined,
+        responseType: "blob",
+      }
+    );
+    const safeName = sessionName ? sessionName.replace(/[^a-z0-9_\-]+/gi, "_") : "session";
+    const dateLabel = new Date().toISOString().slice(0, 10);
+    const fileName = `${safeName}_${dateLabel}.pdf`;
+
+    const blobData = (response.data as unknown) instanceof Blob
+      ? (response.data as unknown as Blob)
+      : new Blob([response.data as unknown as BlobPart], { type: "application/pdf" });
+
+    triggerBlobDownload(blobData, fileName);
+
+    return response.data;
+  },
 };

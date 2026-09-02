@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Camera, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 export default function GalleryPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -156,16 +157,20 @@ export default function GalleryPage() {
                   key={index}
                   className={cn(
                     "relative group overflow-hidden rounded-2xl cursor-pointer",
-                    activeCategory === "all" ? image.span : ""
+                    activeCategory === "all" ? image.span : "",
                   )}
                   onClick={() =>
-                    setSelectedImage({ url: image.url, title: image.title })
+                    setSelectedImage({
+                      url: image.url,
+                      title: image.title,
+                    })
                   }
                 >
-                  <img
+                  <Image
                     src={image.url}
                     alt={image.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
                     <div className="p-5 w-full">
@@ -198,11 +203,15 @@ export default function GalleryPage() {
           >
             <X className="h-6 w-6" />
           </Button>
-          <div className="max-w-5xl max-h-[85vh] w-full" onClick={(e) => e.stopPropagation()}>
-            <img
+          <div
+            className="max-w-5xl max-h-[85vh] w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Image
               src={selectedImage.url}
               alt={selectedImage.title}
-              className="w-full h-full object-contain rounded-lg"
+              fill
+              className="object-contain rounded-lg"
             />
             <p className="text-white text-center mt-4 text-lg font-medium">
               {selectedImage.title}

@@ -136,7 +136,7 @@ export default function ExcoHome({ firstName }: { firstName?: string }) {
         {myDepts.length === 0 ? (
           <Card>
             <CardContent className="py-6 text-sm text-gray-500">
-              You're not assigned as a head or assistant of any department yet.
+              You are not assigned as a head or assistant of any department yet.
               Late-time settings will appear here once you are.
             </CardContent>
           </Card>

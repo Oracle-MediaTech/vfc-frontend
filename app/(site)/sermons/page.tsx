@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, PlayCircle, Clock, User } from "lucide-react";
+import Image from "next/image";
 
 export default function SermonsPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -150,10 +151,11 @@ export default function SermonsPage() {
                   className="group rounded-2xl overflow-hidden bg-white border border-border/50 card-hover"
                 >
                   <div className="relative h-52 overflow-hidden">
-                    <img
+                    <Image
                       src={sermon.thumbnail}
                       alt={sermon.title}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center">
                       <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:bg-white/30 transition-colors cursor-pointer">

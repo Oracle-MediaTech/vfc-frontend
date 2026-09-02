@@ -7,6 +7,7 @@ import {
   HandHeart,
   Flame,
 } from "lucide-react";
+import Image from "next/image";
 
 export default function AboutPage() {
   const values = [
@@ -92,8 +93,8 @@ export default function AboutPage() {
             About Vision Family Church
           </h1>
           <p className="text-lg text-white/80 animate-fade-up animation-delay-200">
-            Building a community of faith, hope, and love in Amassoma and
-            beyond since 2014.
+            Building a community of faith, hope, and love in Amassoma and beyond
+            since 2014.
           </p>
         </div>
       </section>
@@ -152,22 +153,23 @@ export default function AboutPage() {
                 </p>
                 <p>
                   What began as a small gathering of faithful believers has
-                  grown into a vibrant community of worshippers, united by
-                  their love for God and passion for impacting lives.
+                  grown into a vibrant community of worshippers, united by their
+                  love for God and passion for impacting lives.
                 </p>
                 <p>
                   Today, we continue to grow in numbers and in grace, reaching
-                  out to the lost, nurturing believers, and building a legacy
-                  of faith for generations to come.
+                  out to the lost, nurturing believers, and building a legacy of
+                  faith for generations to come.
                 </p>
               </div>
             </div>
             <div className="relative">
-              <div className="rounded-2xl overflow-hidden shadow-2xl">
-                <img
+              <div className="rounded-2xl overflow-hidden shadow-2xl relative h-[400px]">
+                <Image
                   src="https://images.unsplash.com/photo-1438032005730-c779502df39b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
                   alt="Church community"
-                  className="w-full h-[400px] object-cover"
+                  fill
+                  className="object-cover"
                 />
               </div>
               <div className="absolute -bottom-6 -right-6 bg-white p-5 rounded-xl shadow-lg border border-border/50 hidden lg:block">
@@ -226,15 +228,13 @@ export default function AboutPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {leaders.map((leader, index) => (
-              <div
-                key={index}
-                className="group text-center"
-              >
+              <div key={index} className="group text-center">
                 <div className="relative w-52 h-52 mx-auto mb-6 rounded-2xl overflow-hidden shadow-lg">
-                  <img
+                  <Image
                     src={leader.image}
                     alt={leader.name}
-                    className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>

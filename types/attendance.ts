@@ -1,5 +1,13 @@
 import { IUser } from "./user";
 import { ISessionIncome } from "./income";
+export interface AttendanceFilterParams {
+    departmentIds?: string[];
+    gender?: "MALE" | "FEMALE";
+    membershipType?: "WORKER" | "NON_WORKER";
+    churchStatus?: "FIRST_TIMER" | "VISITOR" | "MEMBER";
+    lateComers?: boolean;
+    serviceOrder?: number;
+}
 
 export interface ISessionService {
     id: string;
@@ -135,4 +143,22 @@ export interface AttendanceRatePoint {
     attendeeCount: number;
     totalMembers: number;
     rate: number;
+}
+
+export interface ConsecutiveAbsentee {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  churchStatus: string;
+  consecutiveAbsences: number;
+}
+
+export interface ConsecutiveLateComer {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  churchStatus: string;
+  consecutiveLateCount: number;
 }

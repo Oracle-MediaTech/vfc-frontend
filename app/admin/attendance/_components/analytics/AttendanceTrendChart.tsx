@@ -12,6 +12,8 @@ import {
 import {
   LineChart,
   Line,
+  Area,
+  AreaChart,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -124,7 +126,7 @@ export default function AttendanceTrendChart() {
         ) : (
           <div className="h-[320px]">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData}>
+              {/* <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" fontSize={12} />
                 <YAxis allowDecimals={false} />
@@ -141,7 +143,33 @@ export default function AttendanceTrendChart() {
                   strokeWidth={2}
                   dot={{ r: 4 }}
                 />
-              </LineChart>
+              </LineChart> */}
+
+              <AreaChart data={chartData}>
+  <CartesianGrid strokeDasharray="3 3" />
+
+  <XAxis dataKey="name" />
+
+  <YAxis />
+
+  <Tooltip />
+
+  <Area
+    type="monotone"
+    dataKey="count"
+    fill="#6366f1"
+    fillOpacity={0.15}
+    stroke="none"
+  />
+
+  <Line
+    type="monotone"
+    dataKey="count"
+    stroke="#4f46e5"
+    strokeWidth={3}
+    dot={{ r: 4 }}
+  />
+</AreaChart>
             </ResponsiveContainer>
           </div>
         )}

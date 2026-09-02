@@ -15,7 +15,24 @@ export default function SettingsPage() {
                Church info, service-day templates, and special programs.
             </p>
          </div>
+   return (
+      <div className="space-y-6 max-w-5xl">
+         <div>
+            <h1 className="text-3xl font-bold">Settings</h1>
+            <p className="text-gray-500">
+               Church info, service-day templates, and special programs.
+            </p>
+         </div>
 
+         <Tabs defaultValue="church-info" className="space-y-4">
+            <TabsList>
+               <TabsTrigger value="church-info">Church Info</TabsTrigger>
+               <TabsTrigger value="service-days">Service Days</TabsTrigger>
+               <TabsTrigger value="special-programs">
+                  Special Programs
+               </TabsTrigger>
+               <TabsTrigger value="socials">Socials</TabsTrigger>
+            </TabsList>
          <Tabs defaultValue="church-info" className="space-y-4">
             <TabsList>
                <TabsTrigger value="church-info">Church Info</TabsTrigger>
@@ -29,7 +46,13 @@ export default function SettingsPage() {
             <TabsContent value="church-info">
                <ChurchInfoTab />
             </TabsContent>
+            <TabsContent value="church-info">
+               <ChurchInfoTab />
+            </TabsContent>
 
+            <TabsContent value="service-days">
+               <ServiceDaysTab />
+            </TabsContent>
             <TabsContent value="service-days">
                <ServiceDaysTab />
             </TabsContent>
