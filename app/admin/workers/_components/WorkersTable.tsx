@@ -16,6 +16,7 @@ import {
    Archive,
    RotateCcw,
    CircleSlash,
+   Building2,
 } from "lucide-react";
 import {
    DropdownMenu,
@@ -25,12 +26,13 @@ import {
    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-interface MembersTableProps {
+interface WorkersTableProps {
    data: IUser[];
    onEdit: (user: IUser) => void;
    onChurchJourney: (user: IUser) => void;
    onSetPassword: (user: IUser) => void;
    onDelete: (user: IUser) => void;
+   onAssignPrimaryDepartment: (user: IUser) => void;
    /** Optional: when provided, a "Send Invite" item is added to the row menu. */
    onSendInvite?: (user: IUser) => void;
    /** Optional: lifecycle status mutation. When provided, status actions appear. */
@@ -47,24 +49,22 @@ const ACCOUNT_STATUS_BADGE: Record<AccountStatus, string> = {
 const roleBadgeColor: Record<string, string> = {
    ADMIN: "bg-red-100 text-red-800",
    WORKER: "bg-blue-100 text-blue-800",
-   MEMBER: "bg-gray-100 text-gray-800",
 };
 
 const statusBadgeColor: Record<string, string> = {
-   FIRST_TIMER: "bg-yellow-100 text-yellow-800",
-   VISITOR: "bg-purple-100 text-purple-800",
    MEMBER: "bg-green-100 text-green-800",
 };
 
-export default function MembersTable({
+export default function WorkersTable({
    data,
    onEdit,
    onChurchJourney,
    onSetPassword,
+   onAssignPrimaryDepartment,
    onDelete,
    onSendInvite,
    onUpdateStatus,
-}: MembersTableProps) {
+}: WorkersTableProps) {
    const columns: ColumnDef<IUser>[] = [
       {
          header: "Name",
@@ -87,27 +87,12 @@ export default function MembersTable({
          accessorKey: "phoneNumber",
       },
       {
-         header: "Church Status",
-         accessorKey: "churchStatus",
+         header: "Department",
+         accessorKey: "primaryDepartment",
          cell: ({ row }) => (
-            <Badge
-               variant="outline"
-               className={statusBadgeColor[row.original.churchStatus] || ""}
-            >
-               {row.original.churchStatus?.replace("_", " ")}
-            </Badge>
-         ),
-      },
-      {
-         header: "Role",
-         accessorKey: "role",
-         cell: ({ row }) => (
-            <Badge
-               variant="outline"
-               className={roleBadgeColor[row.original.role || "MEMBER"] || ""}
-            >
-               {row.original.role || "MEMBER"}
-            </Badge>
+            <div className="font-medium">
+               {row.original.primaryDepartment?.name.split(" ")[0] || "nil"}
+            </div>
          ),
       },
       {
@@ -160,6 +145,12 @@ export default function MembersTable({
                         <Mail className="h-4 w-4 mr-2" /> Send Invite Email
                      </DropdownMenuItem>
                   )}
+                  <DropdownMenuItem
+                     onClick={() => onAssignPrimaryDepartment(row.original)}
+                  >
+                     <Building2 className="h-4 w-4 mr-2" /> Assign Primary
+                     Department
+                  </DropdownMenuItem>
                   {onUpdateStatus && (
                      <AccountStatusItems
                         user={row.original}
@@ -348,19 +339,19 @@ function MemberCard({
          </div>
 
          <div className="mt-4 flex flex-wrap gap-2">
-            <Badge
+            {/* <Badge
                variant="outline"
                className={roleBadgeColor[user.role || "MEMBER"]}
             >
                {user.role}
-            </Badge>
+            </Badge> */}
 
-            <Badge
+            {/* <Badge
                variant="outline"
                className={statusBadgeColor[user.churchStatus]}
             >
                {user.churchStatus}
-            </Badge>
+            </Badge> */}
 
             <Badge variant="outline" className={ACCOUNT_STATUS_BADGE[status]}>
                {status}

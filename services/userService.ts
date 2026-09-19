@@ -51,6 +51,13 @@ export const userService = {
          "Invite email sent!",
       ),
 
+   assignPrimaryDepartment: (userId: string, departmentId: string) =>
+      handleApiCall<IUser[]>(() =>
+         apiClient.patch<ApiResponse<IUser[]>>(
+            `/user/assign-primary-department/${userId}/${departmentId}`,
+         ),
+      ),
+
    searchUsers: (name: string) =>
       handleApiCall<IUser[]>(() =>
          apiClient.get<ApiResponse<IUser[]>>(`/user/search`, {
