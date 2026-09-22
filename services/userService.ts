@@ -9,7 +9,43 @@ import {
 import { ApiResponse, PaginatedData } from "@/types/api";
 import { handleApiCall } from "@/lib/utils";
 
+const triggerBlobDownload = (blob: Blob, filename: string) => {
+   const url = URL.createObjectURL(blob);
+   const a = document.createElement("a");
+   a.href = url;
+   a.download = filename;
+   document.body.appendChild(a);
+   a.click();
+   document.body.removeChild(a);
+   URL.revokeObjectURL(url);
+};
+
 export const userService = {
+   exportUsersXLSX: async (
+      data: { name: string; address: string }[],
+   ): Promise<Blob> => {
+      const response = await apiClient.post(
+         `/user/export`,
+         { data },
+         {
+            responseType: "blob",
+         },
+      );
+      const dateLabel = new Date().toISOString().slice(0, 10);
+      const fileName = `vfc-members_${dateLabel}.xlsx`;
+
+      triggerBlobDownload(response.data, fileName);
+
+      return response.data;
+   },
+
+   // exportUsersXLSX: (params: { name: string; address: string }[]) =>
+   //    handleApiCall<IUser[]>(() =>
+   //       apiClient.post<ApiResponse<IUser[]>>("/user/export", {
+   //          params,
+   //       }),
+   //    ),
+
    getUsers: () =>
       handleApiCall<IUser[]>(() =>
          apiClient.get<ApiResponse<IUser[]>>("/user"),
@@ -49,6 +85,13 @@ export const userService = {
                }>
             >(`/user/${id}/invite`, { id }),
          "Invite email sent!",
+      ),
+
+   assignPrimaryDepartment: (userId: string, departmentId: string) =>
+      handleApiCall<IUser[]>(() =>
+         apiClient.patch<ApiResponse<IUser[]>>(
+            `/user/assign-primary-department/${userId}/${departmentId}`,
+         ),
       ),
 
    searchUsers: (name: string) =>

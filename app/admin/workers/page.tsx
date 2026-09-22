@@ -15,6 +15,7 @@ import { userService } from "@/services/userService";
 import { authService } from "@/services/authService";
 import {
    AccountStatus,
+   AssignPrimaryDepartmentPayload,
    IUser,
    UpdateChurchJourneyPayload,
    UpdateUserPayload,
@@ -22,45 +23,51 @@ import {
 } from "@/types/user";
 import { PaginatedData } from "@/types/api";
 import type { RegisterPayload } from "@/types/auth";
-import MembersTable from "./_components/MembersTable";
+import WorkersTable from "./_components/WorkersTable";
 import { ChurchJourneyDialog } from "./_components/ChurchJourneyDialog";
 import { SetPasswordDialog } from "./_components/SetPasswordDialog";
 import { BulkImportDialog } from "./_components/BulkImportDialog";
 import { RegisterMemberDialog } from "./_components/RegisterMemberDialog";
-import { EditMemberDialog } from "./_components/EditMemberDialog";
+import { EditMemberDialog } from "./_components/EditWorkerDialog";
+import { AssignPrimaryDepartment } from "./_components/AssignPrimaryDepartment";
 
-const MEMBERS_ONLY: UserFilterParams = {
+const WORKERS_ONLY: UserFilterParams = {
    page: 1,
    limit: 20,
-   churchStatus: "MEMBER",
+   membershipType: "WORKER",
    accountStatus: "ACTIVE",
    gender: "ALL",
 };
 
-export default function MembersPage() {
-   const [members, setMembers] = useState<IUser[]>([]);
+export default function WorkersPage() {
+   const [workers, setWorkers] = useState<IUser[]>([]);
    const [loading, setLoading] = useState(true);
    const [pagination, setPagination] = useState({
       page: 1,
       totalPages: 1,
       total: 0,
    });
-   const [filters, setFilters] = useState<UserFilterParams>(MEMBERS_ONLY);
+   const [filters, setFilters] = useState<UserFilterParams>(WORKERS_ONLY);
 
    // Dialog states
    const [editUser, setEditUser] = useState<IUser | null>(null);
    const [journeyUser, setJourneyUser] = useState<IUser | null>(null);
+   const [assignPrimaryDepartmentUser, setAssignPrimaryDepartmentUser] =
+      useState<IUser | null>(null);
    const [passwordUser, setPasswordUser] = useState<IUser | null>(null);
    const [showImport, setShowImport] = useState(false);
    const [showRegister, setShowRegister] = useState(false);
    const [searchInput, setSearchInput] = useState("");
 
-   const fetchMembers = useCallback(async () => {
+   const fetchWorkers = useCallback(async () => {
       setLoading(true);
       try {
+         console.log("fetch func", filters);
          const result: PaginatedData<IUser> =
             await userService.getFilteredUsers(filters);
-         setMembers(result.data);
+         setWorkers(
+            result.data.filter((user) => user.membershipType === "WORKER"),
+         );
          setPagination({
             page: result.page,
             totalPages: result.totalPages,
@@ -74,8 +81,8 @@ export default function MembersPage() {
    }, [filters]);
 
    useEffect(() => {
-      fetchMembers();
-   }, [fetchMembers]);
+      fetchWorkers();
+   }, [fetchWorkers]);
 
    useEffect(() => {
       const timeout = setTimeout(() => {
@@ -101,12 +108,21 @@ export default function MembersPage() {
       data: UpdateChurchJourneyPayload,
    ) => {
       await userService.updateChurchJourney(id, data);
-      fetchMembers();
+      fetchWorkers();
+   };
+
+   const handleAssignPrimaryDepartmentSave = async (
+      userId: string | undefined,
+      departmentId: string,
+   ) => {
+      if (userId === undefined) return;
+      await userService.assignPrimaryDepartment(userId, departmentId);
+      fetchWorkers();
    };
 
    const handleEditMemberSave = async (id: string, data: UpdateUserPayload) => {
       await userService.updateUser(id, data);
-      fetchMembers();
+      fetchWorkers();
    };
 
    const handleSetPassword = async (id: string, password: string) => {
@@ -117,7 +133,7 @@ export default function MembersPage() {
       if (!user.id || !confirm(`Delete ${user.firstName} ${user.lastName}?`))
          return;
       await userService.deleteUser(user.id);
-      fetchMembers();
+      fetchWorkers();
    };
 
    const handleSendInvite = async (user: IUser) => {
@@ -132,15 +148,19 @@ export default function MembersPage() {
       await userService.sendInvite(user.id);
    };
 
+   const handleAssignPrimaryDepartment = async (user: IUser) => {
+      console.log(user);
+   };
+
    const handleBulkImport = async (file: File) => {
       const result = await userService.bulkImport(file);
-      fetchMembers();
+      fetchWorkers();
       return result;
    };
 
    const handleRegister = async (payload: RegisterPayload) => {
       await authService.register(payload);
-      fetchMembers();
+      fetchWorkers();
    };
 
    const handleUpdateStatus = async (user: IUser, status: AccountStatus) => {
@@ -148,26 +168,18 @@ export default function MembersPage() {
       if (!confirm(`Set ${user.firstName} ${user.lastName} to ${status}?`))
          return;
       await userService.updateAccountStatus(user.id, status);
-      fetchMembers();
+      fetchWorkers();
    };
 
    return (
       <div className="p-4 md:p-6 space-y-6">
          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-               <h1 className="text-2xl md:text-3xl font-bold">Members</h1>
-               <p className="text-gray-500">{pagination.total} total members</p>
+               <h1 className="text-2xl md:text-3xl font-bold">Workers</h1>
+               <p className="text-gray-500">{pagination.total} total workers</p>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
-               <Button
-                  className="w-full sm:w-auto"
-                  onClick={() => setShowRegister(true)}
-               >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Register Member
-               </Button>
-
                <Button
                   variant="outline"
                   className="w-full sm:w-auto"
@@ -206,21 +218,6 @@ export default function MembersPage() {
             </Select>
 
             <Select
-               value={filters.role || "ALL"}
-               onValueChange={(v) => handleFilterChange("role", v)}
-            >
-               <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Role" />
-               </SelectTrigger>
-               <SelectContent>
-                  <SelectItem value="ALL">All Roles</SelectItem>
-                  <SelectItem value="MEMBER">Member</SelectItem>
-                  <SelectItem value="WORKER">Worker</SelectItem>
-                  <SelectItem value="ADMIN">Admin</SelectItem>
-               </SelectContent>
-            </Select>
-
-            <Select
                value={filters.accountStatus || "ALL"}
                onValueChange={(v) => handleFilterChange("accountStatus", v)}
             >
@@ -240,14 +237,17 @@ export default function MembersPage() {
          {/* Table */}
          {loading ? (
             <div className="overflow-x-auto rounded-lg border">
-               Loading members...
+               Loading workers...
             </div>
          ) : (
-            <MembersTable
-               data={members}
+            <WorkersTable
+               data={workers}
                onEdit={(user) => setEditUser(user)}
                onChurchJourney={(user) => setJourneyUser(user)}
                onSetPassword={(user) => setPasswordUser(user)}
+               onAssignPrimaryDepartment={(user) =>
+                  setAssignPrimaryDepartmentUser(user)
+               }
                onDelete={handleDelete}
                onSendInvite={handleSendInvite}
                onUpdateStatus={handleUpdateStatus}
@@ -299,6 +299,15 @@ export default function MembersPage() {
             onOpenChange={(open) => !open && setJourneyUser(null)}
             user={journeyUser}
             onSave={handleChurchJourneySave}
+         />
+
+         <AssignPrimaryDepartment
+            open={!!assignPrimaryDepartmentUser}
+            onOpenChange={(open) =>
+               !open && setAssignPrimaryDepartmentUser(null)
+            }
+            user={assignPrimaryDepartmentUser}
+            onSave={handleAssignPrimaryDepartmentSave}
          />
 
          <SetPasswordDialog
