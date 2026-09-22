@@ -120,7 +120,7 @@ export default function AddressBook() {
    );
 }
 
-export function AllMembersTable({ users }: { users: IUser[] }) {
+function AllMembersTable({ users }: { users: IUser[] }) {
    const columns: ColumnDef<IUser>[] = [
       {
          header: "Name",
