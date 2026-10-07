@@ -46,6 +46,10 @@ export function DataTable<TData, TValue>({
     state: {
       sorting,
       globalFilter,
+      pagination: {
+        pageIndex: 0,
+        pageSize: 20,
+      },
     },
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
@@ -132,7 +136,7 @@ export function DataTable<TData, TValue>({
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}
